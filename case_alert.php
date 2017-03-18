@@ -24,6 +24,7 @@ class mhero {
     $this->csd_passwd = $csd_passwd;
     $this->csd_doc = $csd_doc;
     $this->rp_csd_doc = $rp_csd_doc;
+    $this->reporter_facility = $this->get_provider_facility($this->reporter_globalid);
   }
 
   public function get_contacts_in_grp ($group_name) {
@@ -78,8 +79,7 @@ class mhero {
   }
 
   public function get_dso() {
-    $fac = $this->get_provider_facility($this->reporter_globalid);
-    $district_uuid = $fac["parent"];
+    $district_uuid = $this->reporter_facility["parent"];
     //get facilities under $district_uuid
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
            <csd:organizations>
@@ -116,8 +116,7 @@ class mhero {
   }
 
   public function get_cso() {
-    $fac = $this->get_provider_facility($this->reporter_globalid);
-    $district_uuid = $fac["parent"];
+    $district_uuid = $this->reporter_facility["parent"];
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
           <csd:id entityID="'.$district_uuid.'">
           </csd:id>
@@ -225,17 +224,17 @@ class mhero {
   public function send_confirmation () {
     $flow_uuid = "95ed064f-104d-4290-8723-611074b94cd5";
     $dso = $this->get_dso();
-
+    $cont_alert = $this->get_rapidpro_id($dso);
     $extra = '"reporter_name":"'. $this->reporter_name .
              '","reporter_rp_id":"'.$this->reporter_rp_id.
              '","phone":"'.$this->phone.
-             '","facility":"'.$fac["name"].
+             '","facility":"'.$this->reporter_facility["name"].
              '","report":"'.$this->report.
              '","disease":"'.$this->disease.
              '","age":"'.$this->age.
              '","outcome":"'.$this->outcome.
              '","lab":"'.$this->lab.'"';
-    $this->start_flow($flow_uuid,'',$dso,$extra);
+    $this->start_flow($flow_uuid,'',$cont_alert,$extra);
   }
 
   public function alert_all (){
@@ -247,9 +246,8 @@ class mhero {
       if(count($other_contacts)>0)
       $cont_alert = array_merge($cont_alert,$other_contacts);
     }
-    $this->fac = $this->get_provider_facility($this->reporter_globalid);
     //alert all partners
-    $msg = "DSO has validated a suspected case of ".$this->disease." Reported By ".$this->reporter_name." From ".$this->fac["name"]." Patient Details (Age=".$this->age.",Outcome=".$this->outcome.")";
+    $msg = "DSO has validated a suspected case of ".$this->disease." Reported By ".$this->reporter_name." From ".$this->reporter_facility["name"]." Patient Details (Age=".$this->age.",Outcome=".$this->outcome.")";
     $this->broadcast($cont_alert,$msg);
 
     //notify reporter
@@ -299,7 +297,7 @@ class mhero {
     $post_data = '{
                     "reportingPerson":"'.$this->reporter_name.'",
                     "reportingPhoneNumber":"'.$this->phone.'",
-                    "facilityName":"'.$this->fac["name"].'",
+                    "facilityName":"'.$this->reporter_facility["name"].'",
                     "diseaseName":"'.$this->disease.'",
                     "patientOutcome":"'.$this->outcome.'",
                     "patientAge":"'.$this->age.'"
