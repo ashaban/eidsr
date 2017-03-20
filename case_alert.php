@@ -1,24 +1,15 @@
 <?php
-/*
-//$tel = "0683088399";
-//$name = "Rodney";
-//$facility = "Fake Facility";
-//$uuid = "5bff251f-48e7-415d-95cb-46444704de4d";
-//$report = "alert Cholera 56 Dead";
-$report = explode(" ",$report);
-unset($report[0]);
-$report = implode(" ",$report);
-* 
-*/
 class mhero {
-  function __construct($phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc) {
-    $this->phone = $phone;
+  function __construct($reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$broadcast_flow_uuid,$channel) {
+    $this->reporter_phone = $reporter_phone;
     $this->reporter_name = $reporter_name;
     $this->report = $report;
     $this->reporter_rp_id = $reporter_rp_id;
     $this->reporter_globalid = $reporter_globalid;
     $this->rapidpro_token = $rapidpro_token;
+    $this->broadcast_flow_uuid = $broadcast_flow_uuid;
     $this->rapidpro_host = $rapidpro_url;
+    $this->channel = $channel;
     $this->csd_host = $csd_host;
     $this->csd_user = $csd_user;
     $this->csd_passwd = $csd_passwd;
@@ -227,7 +218,8 @@ class mhero {
     $cont_alert = $this->get_rapidpro_id($dso);
     $extra = '"reporter_name":"'. $this->reporter_name .
              '","reporter_rp_id":"'.$this->reporter_rp_id.
-             '","phone":"'.$this->phone.
+             '","reporter_globalid":"'.$this->reporter_globalid.
+             '","reporter_phone":"'.$this->reporter_phone.
              '","facility":"'.$this->reporter_facility["name"].
              '","report":"'.$this->report.
              '","disease":"'.$this->disease.
@@ -267,12 +259,11 @@ class mhero {
     if(count($contacts_uuid)>0) {
       foreach ($contacts_uuid as $cont_uuid) {
         $post_data = '{ "flow":"'.$flow_uuid.'",
-                        "groups":["'.$group_uuid.'"],
                         "contacts":["'.$cont_uuid.'"],
                         "extra": {'.$extra.'}
                       }';
         error_log($post_data);
-        //$this->exec_request($url,"","","POST",$post_data,$header);
+        $this->exec_request($url,"","","POST",$post_data,$header);
       }
     }
   }
@@ -286,7 +277,7 @@ class mhero {
       foreach($contacts_uuid as $uuid) {
         $post_data = '{ "contacts": ["'.$uuid.'"], "text": "'.$msg.'" }';
         error_log($post_data);
-      //$this->exec_request($url,"","","POST",$post_data,$header);
+      $this->exec_request($url,"","","POST",$post_data,$header);
       }
   }
 
@@ -296,7 +287,7 @@ class mhero {
                    );
     $post_data = '{
                     "reportingPerson":"'.$this->reporter_name.'",
-                    "reportingPhoneNumber":"'.$this->phone.'",
+                    "reportingPhoneNumber":"'.$this->reporter_phone.'",
                     "facilityName":"'.$this->reporter_facility["name"].'",
                     "diseaseName":"'.$this->disease.'",
                     "patientOutcome":"'.$this->outcome.'",
@@ -338,14 +329,16 @@ class mhero {
 
 }
 
-$category = $_REQUEST["category"] = "alert_all";
-$phone = $_REQUEST["phone"] = "+255683088392";
-$report = $_REQUEST["report"] = "alert.Cholera.56.Dead.Yes";
+$category = $_REQUEST["category"];
+$reporter_phone = $_REQUEST["reporter_phone"];
+$report = $_REQUEST["report"];
 $reporter_rp_id = $_REQUEST["reporter_rp_id"];
-$reporter_name = $_REQUEST["reporter_name"] = "Ally Shaban";
-$reporter_globalid = $_REQUEST["reporter_globalid"] = "urn:uuid:f871b5da-1244-3ecb-ac58-abfe236eaae7";
-$rapidpro_token = "808fb33c0511c57835ef3555b66505945453ca8d";
+$reporter_name = $_REQUEST["reporter_name"];
+$reporter_globalid = $_REQUEST["reporter_globalid"];
+$rapidpro_token = "";
+$broadcast_flow_uuid = "d491bc11-35ff-4f65-a2d8-ae51d0ed9288";
 $rapidpro_url = "https://app.rapidpro.io/";
+$channel = "80ab406b-1a6b-44d5-ad0c-26866bfa844b";//optional
 $csd_host = "http://localhost:8984/CSD/";
 $csd_user = "csd";
 $csd_passwd = "csd";
@@ -356,7 +349,7 @@ $eidsr_user = "";
 $eidsr_passwd = "";
 
 $report = str_replace("alert.","",$report);
-$mhero = new mhero($phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host);
+$mhero = new mhero($reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$broadcast_flow_uuid,$channel);
 if($category == "confirm") {
   $mhero->validate_report();
   $mhero->send_confirmation();
