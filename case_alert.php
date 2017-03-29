@@ -1,9 +1,12 @@
 <?php
 class mhero {
-  function __construct($reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$broadcast_flow_uuid,$channel) {
+  function __construct( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
+                        $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$broadcast_flow_uuid,$channel,$reported_disease
+                       ) {
     $this->reporter_phone = $reporter_phone;
     $this->reporter_name = $reporter_name;
     $this->report = $report;
+    $this->reported_disease = $reported_disease;
     $this->reporter_rp_id = $reporter_rp_id;
     $this->reporter_globalid = $reporter_globalid;
     $this->rapidpro_token = $rapidpro_token;
@@ -15,6 +18,9 @@ class mhero {
     $this->csd_passwd = $csd_passwd;
     $this->csd_doc = $csd_doc;
     $this->rp_csd_doc = $rp_csd_doc;
+    $this->eidsr_host = $eidsr_host;
+    $this->eidsr_user = $eidsr_user;
+    $this->eidsr_passwd = $eidsr_passwd;
     $this->reporter_facility = $this->get_provider_facility($this->reporter_globalid);
   }
 
@@ -184,7 +190,7 @@ class mhero {
       } else {
             $rp_ids = array();
             foreach ($resp as $res) {
-                if (!is_array($res) 
+                if (!is_array($res)
                     || ! array_key_exists('entityID',$res)
                     || ! array_key_exists('otherID',$res)
                     || ! is_array( $res['otherID'])
@@ -212,40 +218,31 @@ class mhero {
     $this->outcome = $rep[2];
     $this->lab = $rep[3];
   }
-  public function send_confirmation () {
-    $flow_uuid = "95ed064f-104d-4290-8723-611074b94cd5";
-    $dso = $this->get_dso();
-    $cont_alert = $this->get_rapidpro_id($dso);
-    $extra = '"reporter_name":"'. $this->reporter_name .
-             '","reporter_rp_id":"'.$this->reporter_rp_id.
-             '","reporter_globalid":"'.$this->reporter_globalid.
-             '","reporter_phone":"'.$this->reporter_phone.
-             '","facility":"'.$this->reporter_facility["name"].
-             '","report":"'.$this->report.
-             '","disease":"'.$this->disease.
-             '","age":"'.$this->age.
-             '","outcome":"'.$this->outcome.
-             '","lab":"'.$this->lab.'"';
-    $this->start_flow($flow_uuid,'',$cont_alert,$extra);
-  }
 
   public function alert_all (){
     //get county
-    $cso = $this->get_cso();
-    $cont_alert = $this->get_rapidpro_id($cso);
+    $cont_alert = array();
     foreach($this->notify_group as $group_name) {
       $other_contacts = $this->get_contacts_in_grp (urlencode($group_name));
       if(count($other_contacts)>0)
       $cont_alert = array_merge($cont_alert,$other_contacts);
     }
     //alert all partners
-    $msg = "DSO has validated a suspected case of ".$this->disease." Reported By ".$this->reporter_name." From ".$this->reporter_facility["name"]." Patient Details (Age=".$this->age.",Outcome=".$this->outcome.")";
+    $msg = "A suspected case of ".$this->disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.".Patient Details (Age=".$this->age.",Outcome=".$this->outcome.")";
     $this->broadcast($cont_alert,$msg);
 
-    //notify reporter
-    $msg = "Thank you for reporting a suspected case of ". $this->disease.",This report was validated by your DSO and has been forwarded for further action.";
-    $cont_alert = array($this->reporter_rp_id);
+    //alert CSO
+    $cso = $this->get_cso();
+    $cont_alert = $this->get_rapidpro_id($cso);
+    $msg = "A suspected case of ".$this->disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.".Patient Details (Age=".$this->age.",Outcome=".$this->outcome.") Please verify with DSO";
     $this->broadcast($cont_alert,$msg);
+
+    //alert DSO
+    $dso = $this->get_dso();
+    $cont_alert = $this->get_rapidpro_id($dso);
+    $msg = "A suspected case of ".$this->disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name."(".$this->reporter_phone.").Patient Details (Age=".$this->age.",Outcome=".$this->outcome.") Please call or visit health facility to verify";
+    $this->broadcast($cont_alert,$msg);
+    //send data to offline tracker
     $this->send_to_eidsr();
   }
 
@@ -332,6 +329,7 @@ class mhero {
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
+$reported_disease = $_REQUEST["reported_disease"];
 $reporter_rp_id = $_REQUEST["reporter_rp_id"];
 $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
@@ -349,21 +347,13 @@ $eidsr_user = "";
 $eidsr_passwd = "";
 
 $report = str_replace("alert.","",$report);
-$mhero = new mhero($reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$broadcast_flow_uuid,$channel);
-if($category == "confirm") {
-  $mhero->validate_report();
-  $mhero->send_confirmation();
-}
+$mhero = new mhero( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
+                    $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$broadcast_flow_uuid,$channel,$reported_disease
+                  );
 
-else if($category == "alert_all") {
+if($category == "alert_all") {
   $mhero->notify_group = array("DPC Group","Assistant Ministers");
-  $mhero->disease = $_REQUEST["disease"];
-  $mhero->age = $_REQUEST["age"];
-  $mhero->outcome = $_REQUEST["outcome"];
-  $mhero->lab = $_REQUEST["lab"];
-  $mhero->eidsr_host = $eidsr_host;
-  $mhero->eidsr_user = $eidsr_user;
-  $mhero->eidsr_passwd = $eidsr_passwd;
+  $mhero->validate_report();
   $mhero->alert_all();
 }
 ?>
