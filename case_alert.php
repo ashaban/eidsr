@@ -75,6 +75,17 @@ class mhero {
     return $fac;
   }
 
+  public function get_dhis2_facility_uid($facility_uuid) {
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+          <csd:id entityID="'.$facility_uuid.'"/>
+          <csd:otherID position="2"/>
+        </csd:requestParams>';
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:facility_read_otherid";
+    $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $fac_uuid = $this->extract($fac_entity,"/csd:facility/csd:otherID",'facilityDirectory',true);
+    return $fac_uuid;
+  }
+
   public function get_dso() {
     $district_uuid = $this->reporter_facility["parent"];
     //get facilities under $district_uuid
@@ -212,11 +223,22 @@ class mhero {
   }
 
   public function validate_report() {
-    $rep = explode(".",$this->report);
-    $this->disease = $rep[0];
-    $this->age = $rep[1];
-    $this->outcome = $rep[2];
-    $this->lab = $rep[3];
+    $report = explode(".",$this->report);
+    $possible_alive_outcomes = array("alive","alve","aliv","ali","alv");
+    $possible_dead_outcomes = array("dead","dea","de","ded","dd","da");
+    $possible_specimen = array("yes","ye","y");
+    if(count($report)>1 and is_numeric($report[1])) {
+      $this->caseid = $report[1];
+    }
+    else if (!$this->caseid and count($report)>1 and in_array(strtolower($report[1]),$possible_specimen)) {
+      $this->specimen = $report[1];
+    }
+    if(!$this->caseid and count($report)>2 and is_numeric($report[2])) {
+      $this->caseid = $report[2];
+    }
+    else if(!$this->specimen and count($report)>2 and in_array(strtolower($report[2]),$possible_specimen)) {
+      $this->specimen = $report[2];
+    }
   }
 
   public function alert_all (){
@@ -228,19 +250,19 @@ class mhero {
       $cont_alert = array_merge($cont_alert,$other_contacts);
     }
     //alert all partners
-    $msg = "A suspected case of ".$this->disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.".Patient Details (Age=".$this->age.",Outcome=".$this->outcome.")";
+    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.".Patient Details (Age=".$this->age.",Outcome=".$this->outcome.")";
     $this->broadcast($cont_alert,$msg);
 
     //alert CSO
     $cso = $this->get_cso();
     $cont_alert = $this->get_rapidpro_id($cso);
-    $msg = "A suspected case of ".$this->disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.".Patient Details (Age=".$this->age.",Outcome=".$this->outcome.") Please verify with DSO";
+    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.".Patient Details (Age=".$this->age.",Outcome=".$this->outcome.") Please verify with DSO";
     $this->broadcast($cont_alert,$msg);
 
     //alert DSO
     $dso = $this->get_dso();
     $cont_alert = $this->get_rapidpro_id($dso);
-    $msg = "A suspected case of ".$this->disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name."(".$this->reporter_phone.").Patient Details (Age=".$this->age.",Outcome=".$this->outcome.") Please call or visit health facility to verify";
+    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name."(".$this->reporter_phone.").Patient Details (Age=".$this->age.",Outcome=".$this->outcome.") Please call or visit health facility to verify";
     $this->broadcast($cont_alert,$msg);
     //send data to offline tracker
     $this->send_to_eidsr();
@@ -279,14 +301,16 @@ class mhero {
   }
 
   public function send_to_eidsr() {
+    $dhis2_facility_uid = get_dhis2_facility_uid($this->reporter_facility["uuid"]);
     $header = Array(
                     "Content-Type: application/json"
                    );
     $post_data = '{
                     "reportingPerson":"'.$this->reporter_name.'",
                     "reportingPhoneNumber":"'.$this->reporter_phone.'",
+                    "facilityUID":"'.$dhis2_facility_uid.'",
                     "facilityName":"'.$this->reporter_facility["name"].'",
-                    "diseaseName":"'.$this->disease.'",
+                    "diseaseName":"'.$this->reported_disease.'",
                     "patientOutcome":"'.$this->outcome.'",
                     "patientAge":"'.$this->age.'"
                   }';
@@ -354,6 +378,6 @@ $mhero = new mhero( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$repo
 if($category == "alert_all") {
   $mhero->notify_group = array("DPC Group","Assistant Ministers");
   $mhero->validate_report();
-  $mhero->alert_all();
+  //$mhero->alert_all();
 }
 ?>
