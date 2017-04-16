@@ -17,6 +17,7 @@
                 "eng": "@contact.name  We did not understand your ALERT. Please either resend or call your DSO immediately."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -24,7 +25,7 @@
         {
           "y": 120, 
           "x": 293, 
-          "destination": null, 
+          "destination": "7ccd2e99-b349-4658-99ac-7802e9c9754e", 
           "uuid": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
           "actions": [
             {
@@ -37,6 +38,7 @@
                 "eng": "You have just reported a suspected case of @flow.suspected_report.category"
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }, 
             {
@@ -44,6 +46,7 @@
                 "eng": "Has the patient traveled out of the country in the last one month? Please answer with yes, no or don't know."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -59,6 +62,7 @@
                 "eng": "Did you collect a sample for this case alert? Please answer yes or no."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -74,6 +78,7 @@
                 "eng": "Thank you for submitting this case alert for @flow.suspected_report.category! Your DSO and CSO will also receive a notification."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -89,6 +94,7 @@
                 "eng": "@flow.suspected_report.category  requires that a specimen is collected. Please tell us why you did not collect a specimen."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -104,6 +110,7 @@
                 "eng": "Thank you for submitting this case alert for @flow.suspected_report.category! Your DSO and CSO will also receive a notification."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -119,6 +126,7 @@
                 "eng": "We do not understand your response. Did you collect a sample for this case? Please answer yes or no."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -134,6 +142,7 @@
                 "eng": "Was this disease detected in a community? Please answer either Yes, No or don't know."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -149,6 +158,7 @@
                 "eng": "We do not understand your response. Was the disease detected in a community? Please answer yes, no or don't know."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -164,6 +174,7 @@
                 "eng": "We do not understand your response. Did the patient travel out of the country in the last month? Please answer yes, no or don't know."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -179,6 +190,7 @@
                 "eng": "Thank you for submitting this case alert for @flow.suspected_report.category! Your DSO and CSO will also receive a notification."
               }, 
               "media": {}, 
+              "send_all": false, 
               "type": "reply"
             }
           ]
@@ -1028,8 +1040,8 @@
         "notes": [], 
         "expires": 10080, 
         "name": "mHero eIDSR Validation", 
-        "saved_on": "2017-04-03T06:42:56.001450Z", 
-        "revision": 113
+        "saved_on": "2017-04-16T20:10:02.350081Z", 
+        "revision": 114
       }
     }
   ], 
