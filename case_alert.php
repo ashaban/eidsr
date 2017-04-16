@@ -1,5 +1,5 @@
 <?php
-class mhero {
+class eidsr {
   function __construct( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
                         $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$broadcast_flow_uuid,$channel,$reported_disease
                        ) {
@@ -27,7 +27,7 @@ class mhero {
 
   public function get_contacts_in_grp ($group_name) {
     $group_uuid = $this->get_group_uuid ($group_name);
-    $url = $this->rapidpro_host."api/v1/contacts.json?group_uuids=$group_uuid";
+    $url = $this->rapidpro_host."api/v2/contacts.json?group=$group_uuid";
     $header = Array(
                          "Content-Type: application/json",
                          "Authorization: Token $this->rapidpro_token"
@@ -55,7 +55,7 @@ class mhero {
     }
   }
 
-  public function get_provider_facility($provider_uuid) {
+  public static function get_provider_facility($provider_uuid) {
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
           <csd:id entityID="'.$provider_uuid.'">
           </csd:id>
@@ -72,7 +72,16 @@ class mhero {
     $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $fac_name = $this->extract($fac_entity,"/csd:facility/csd:primaryName",'facilityDirectory',true);
     $fac_parent = $this->extract($fac_entity,"/csd:facility/csd:organizations/csd:organization/@entityID",'facilityDirectory',true);
-    $fac = array("uuid"=>$fac_uuid,"name"=>$fac_name,"parent"=>$fac_parent);
+
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+          <csd:id entityID="'.$fac_uuid.'"/>
+          <csd:otherID position="3"/>
+        </csd:requestParams>';
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:facility_read_otherid";
+    $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $fac_code = $this->extract($fac_entity,"/csd:facility/csd:otherID",'facilityDirectory',true);
+
+    $fac = array("uuid"=>$fac_uuid,"code"=>$fac_code,"name"=>$fac_name,"parent"=>$fac_parent);
     return $fac;
   }
 
@@ -83,8 +92,8 @@ class mhero {
         </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:facility_read_otherid";
     $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    $fac_uuid = $this->extract($fac_entity,"/csd:facility/csd:otherID",'facilityDirectory',true);
-    return $fac_uuid;
+    $dhis2_fac_uid = $this->extract($fac_entity,"/csd:facility/csd:otherID",'facilityDirectory',true);
+    return $dhis2_fac_uid;
   }
 
   public function get_county_uuid($district_uuid) {
@@ -105,12 +114,16 @@ class mhero {
         </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:organization_read_otherid";
     $org_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    $org_uuid = $this->extract($org_entity,"/csd:facility/csd:otherID",'organizationDirectory',true);
+    $org_uuid = $this->extract($org_entity,"/csd:organization/csd:otherID",'organizationDirectory',true);
     return $org_uuid;
   }
 
   public function get_dso() {
     $district_uuid = $this->reporter_facility["parent"];
+    if(!$district_uuid) {
+      error_log("District UUID Missing,DSO wont be alerted");
+      return array();
+    }
     //get facilities under $district_uuid
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
            <csd:organizations>
@@ -148,6 +161,10 @@ class mhero {
 
   public function get_cso() {
     //get districts under $this->county_uuid
+    if(!$this->county_uuid) {
+      error_log("County UUID Missing,CSO wont be alerted");
+      return array();
+    }
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
            <csd:parent entityID="'.$this->county_uuid.'"/>
           </csd:requestParams>';
@@ -242,17 +259,18 @@ class mhero {
     $possible_alive_outcomes = array("alive","alve","aliv","ali","alv");
     $possible_dead_outcomes = array("dead","dea","de","ded","dd","da");
     $possible_specimen = array("yes","ye","y");
+    $this->specimen = false;
     if(count($report)>1 and is_numeric($report[1])) {
       $this->caseid = $report[1];
     }
     else if (!$this->caseid and count($report)>1 and in_array(strtolower($report[1]),$possible_specimen)) {
-      $this->specimen = $report[1];
+      $this->specimen = true;
     }
     if(!$this->caseid and count($report)>2 and is_numeric($report[2])) {
       $this->caseid = $report[2];
     }
     else if(!$this->specimen and count($report)>2 and in_array(strtolower($report[2]),$possible_specimen)) {
-      $this->specimen = $report[2];
+      $this->specimen = true;
     }
   }
 
@@ -265,19 +283,33 @@ class mhero {
     }
     //alert all partners
     $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.".";
+    if($this->specimen)
+    $msg .= "A sample was also taken for Riders to pick";
     $this->broadcast($cont_alert,$msg);
 
     //alert CSO
     $cso = $this->get_cso();
     $cont_alert = $this->get_rapidpro_id($cso);
     $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.". Please verify with DSO";
+    if($this->specimen)
+    $msg .= ".A sample was also taken for Riders to pick";
     $this->broadcast($cont_alert,$msg);
 
     //alert DSO
     $dso = $this->get_dso();
     $cont_alert = $this->get_rapidpro_id($dso);
     $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name."(".$this->reporter_phone."). Please call or visit health facility to verify";
+    if($this->specimen)
+    $msg .= ".A sample was also taken for Riders to pick";
     $this->broadcast($cont_alert,$msg);
+
+    //if sample collected then alert Riders dispatch
+    if($this->specimen) {
+      $riders_contacts = $this->get_contacts_in_grp(urlencode("Riders Dispatch"));
+      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." Facility. Sample is available at the facility for you to pick";
+      $this->broadcast($cont_alert,$msg);
+    }
+
     //send data to offline tracker
     $this->send_to_eidsr();
   }
@@ -315,7 +347,7 @@ class mhero {
   }
 
   public function send_to_eidsr() {
-    $dhis2_facility_uid = get_dhis2_facility_uid($this->reporter_facility["uuid"]);
+    $dhis2_facility_uid = $this->get_dhis2_facility_uid($this->reporter_facility["uuid"]);
     $header = Array(
                     "Content-Type: application/json"
                    );
@@ -328,9 +360,9 @@ class mhero {
                     "reportingPerson":"'.$this->reporter_name.'",
                     "reportingPhoneNumber":"'.$this->reporter_phone.'",
                     "facilityUID":"'.$dhis2_facility_uid.'",
+                    "facilityCode":"'.$this->reporter_facility["code"].'",
                     "facilityName":"'.$this->reporter_facility["name"].'",
-                    "diseaseName":"'.$this->reported_disease.'",
-                    "idsrid":"'.$idsrid.'"
+                    "diseaseName":"'.$this->reported_disease.'"
                   }';
     error_log($post_data);
     //$this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header);
@@ -368,7 +400,15 @@ class mhero {
 
 }
 
+
 $category = $_REQUEST["category"];
+if($category == "query") {
+  if($_REQUEST["query_type"] == "provider_facility" and $_REQUEST["reporter_globalid"]) {
+    $reporter_facility = eidsr::get_provider_facility($_REQUEST["reporter_globalid"]);
+    return '{"facility":"'.$reporter_facility["name"].'"}';
+  }
+return;
+}
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
 $reported_disease = $_REQUEST["reported_disease"];
@@ -389,13 +429,13 @@ $eidsr_user = "";
 $eidsr_passwd = "";
 
 $report = str_replace("alert.","",$report);
-$mhero = new mhero( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
+$eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
                     $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$broadcast_flow_uuid,$channel,$reported_disease
                   );
 
 if($category == "alert_all") {
-  $mhero->notify_group = array("DPC Group","Assistant Ministers");
-  $mhero->validate_report();
-  //$mhero->alert_all();
+  $eidsr->notify_group = array("DPC Group","Assistant Ministers");
+  $eidsr->validate_report();
+  $eidsr->alert_all();
 }
 ?>
