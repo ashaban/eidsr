@@ -401,15 +401,6 @@ class eidsr {
 
 
 $category = $_REQUEST["category"];
-if($category == "query") {
-  if($_REQUEST["query_type"] == "provider_facility" and $_REQUEST["reporter_globalid"]) {
-    $reporter_facility = eidsr::get_provider_facility($_REQUEST["reporter_globalid"]);
-    echo '{"facility":"'.$reporter_facility["name"].'"}';
-  }
-else
-echo '{"facility":"Unknown"}';
-return;
-}
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
 $reported_disease = $_REQUEST["reported_disease"];
@@ -436,5 +427,14 @@ if($category == "alert_all") {
   $eidsr->notify_group = array("DPC Group");
   $eidsr->validate_report();
   $eidsr->alert_all();
+}
+if($category == "query") {
+  if($_REQUEST["query_type"] == "provider_facility" and $_REQUEST["reporter_globalid"]) {
+    $reporter_facility = $eidsr->get_provider_facility($_REQUEST["reporter_globalid"]);
+    echo '{"facility":"'.$reporter_facility["name"].'"}';
+  }
+else
+echo '{"facility":"Unknown"}';
+return;
 }
 ?>
