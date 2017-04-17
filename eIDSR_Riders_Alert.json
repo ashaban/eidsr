@@ -1,114 +1,125 @@
 {
-  "campaigns": [], 
-  "version": 10, 
-  "site": "https://app.rapidpro.io", 
+  "campaigns": [],
+  "version": 10,
+  "site": "https://app.rapidpro.io",
   "flows": [
     {
-      "base_language": "eng", 
+      "base_language": "eng",
       "action_sets": [
         {
-          "y": 0, 
-          "x": 579, 
-          "destination": "7f7e4a5e-b38d-499b-8655-60c404a0bac9", 
-          "uuid": "7894f896-a636-46db-88fd-31645309741c", 
+          "y": 0,
+          "x": 579,
+          "destination": "7f7e4a5e-b38d-499b-8655-60c404a0bac9",
+          "uuid": "7894f896-a636-46db-88fd-31645309741c",
           "actions": [
             {
-              "action": "POST", 
-              "type": "api", 
+              "action": "POST",
+              "type": "api",
               "webhook": "http://52.18.125.4:8081/eidsr/case_alert.php?category=query&query_type=provider_facility&reporter_globalid=@contact.globalid"
             }
           ]
-        }, 
+        },
         {
-          "y": 299, 
-          "x": 411, 
-          "destination": null, 
-          "uuid": "64efd9b9-719a-4dd9-ad1c-36b6c5d9da68", 
+          "y": 299,
+          "x": 411,
+          "destination": null,
+          "uuid": "64efd9b9-719a-4dd9-ad1c-36b6c5d9da68",
           "actions": [
             {
-              "contacts": [], 
-              "media": {}, 
-              "variables": [], 
+              "contacts": [],
+              "media": {},
+              "variables": [],
               "groups": [
                 {
-                  "name": "Riders Dispatch", 
+                  "name": "Riders Dispatch",
                   "uuid": "3460f683-61c5-47d3-86db-3721ae166e7c"
                 }
-              ], 
+              ],
               "msg": {
                 "eng": "There is a sample for pick up at @extra.facility facility. Please send a driver for pick up or wait for the sample to get to the relay facility"
-              }, 
+              },
               "type": "send"
             }
           ]
-        }, 
+        },
         {
-          "y": 289, 
-          "x": 844, 
-          "destination": null, 
-          "uuid": "c16fb262-4802-4203-ba6f-42975ec7fd3c", 
+          "y": 289,
+          "x": 844,
+          "destination": null,
+          "uuid": "c16fb262-4802-4203-ba6f-42975ec7fd3c",
           "actions": [
             {
               "msg": {
                 "eng": "You are not permitted to request sample pickup by Riders Dispatch"
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
         }
-      ], 
-      "version": 10, 
-      "flow_type": "F", 
-      "entry": "7894f896-a636-46db-88fd-31645309741c", 
+      ],
+      "version": 10,
+      "flow_type": "F",
+      "entry": "7894f896-a636-46db-88fd-31645309741c",
       "rule_sets": [
         {
-          "uuid": "7f7e4a5e-b38d-499b-8655-60c404a0bac9", 
+          "uuid": "7f7e4a5e-b38d-499b-8655-60c404a0bac9",
           "rules": [
             {
               "test": {
-                "test": {}, 
+                "test": {},
                 "type": "not_empty"
-              }, 
+              },
               "category": {
                 "eng": "Facility Exists"
-              }, 
-              "destination": "64efd9b9-719a-4dd9-ad1c-36b6c5d9da68", 
-              "uuid": "14f845e9-9388-4d9a-8202-6827b85970e9", 
+              },
+              "destination": "64efd9b9-719a-4dd9-ad1c-36b6c5d9da68",
+              "uuid": "14f845e9-9388-4d9a-8202-6827b85970e9",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
-                "test": "true", 
+                "test": "true",
                 "type": "true"
-              }, 
+              },
               "category": {
                 "eng": "Other"
-              }, 
-              "destination": "c16fb262-4802-4203-ba6f-42975ec7fd3c", 
-              "uuid": "e06b6a56-70d7-4253-bd1f-35f8c1a4e14c", 
+              },
+              "destination": "c16fb262-4802-4203-ba6f-42975ec7fd3c",
+              "uuid": "e06b6a56-70d7-4253-bd1f-35f8c1a4e14c",
               "destination_type": "A"
             }
-          ], 
-          "ruleset_type": "expression", 
-          "label": "Facility Exists", 
-          "operand": "@extra.facility", 
-          "finished_key": null, 
-          "response_type": "", 
-          "y": 197, 
-          "x": 584, 
+          ],
+          "ruleset_type": "expression",
+          "label": "Facility Exists",
+          "operand": "@extra.facility",
+          "finished_key": null,
+          "response_type": "",
+          "y": 197,
+          "x": 584,
           "config": {}
         }
-      ], 
+      ],
       "metadata": {
-        "expires": 10080, 
-        "revision": 31, 
-        "uuid": "b29d8c5e-dc4b-4bc2-b837-3d44b3499d09", 
-        "name": "eIDSR Alert for Riders Dispatch", 
+        "expires": 10080,
+        "revision": 31,
+        "uuid": "b29d8c5e-dc4b-4bc2-b837-3d44b3499d09",
+        "name": "mHero eIDSR Alert for Riders Dispatch",
         "saved_on": "2017-04-16T19:53:22.007291Z"
       }
     }
-  ], 
-  "triggers": []
+  ],
+  "triggers": [
+    {
+      "trigger_type": "K",
+      "flow": {
+        "name": "mHero eIDSR Alert for Riders Dispatch",
+        "uuid": "b29d8c5e-dc4b-4bc2-b837-3d44b3499d09"
+      },
+      "groups": [],
+      "keyword": "pickup",
+      "channel": null
+    }
+  ]
 }

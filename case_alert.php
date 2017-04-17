@@ -216,6 +216,7 @@ class eidsr {
   }
 
   public function get_rapidpro_id ($provs_uuid = array()) {
+    $ids = "";
     foreach ($provs_uuid as $prov) {
         $ids .= "<csd:id entityID='" . $prov . "'/>\n" ;
       }
@@ -306,8 +307,8 @@ class eidsr {
     //if sample collected then alert Riders dispatch
     if($this->specimen) {
       $riders_contacts = $this->get_contacts_in_grp(urlencode("Riders Dispatch"));
-      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." Facility. Sample is available at the facility for you to pick";
-      $this->broadcast($cont_alert,$msg);
+      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." Facility. Sample is available at this facility for you to pick";
+      $this->broadcast($riders_contacts,$msg);
     }
 
     //send data to offline tracker
@@ -430,7 +431,7 @@ $eidsr_host = "https://lib-eidsr-dev.ehealthafrica.org/casealert";
 $eidsr_user = "";
 $eidsr_passwd = "";
 
-$report = str_replace("alert.","",$report);
+$report = str_ireplace("alert.","",$report);
 $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
                     $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$broadcast_flow_uuid,$channel,$reported_disease
                   );

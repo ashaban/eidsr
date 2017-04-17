@@ -1,1059 +1,1059 @@
 {
-  "campaigns": [], 
-  "version": 10, 
-  "site": "https://textit.in", 
+  "campaigns": [],
+  "version": 10,
+  "site": "https://textit.in",
   "flows": [
     {
-      "base_language": "eng", 
+      "base_language": "eng",
       "action_sets": [
         {
-          "y": 9, 
-          "x": 1145, 
-          "destination": "373e0697-1b43-4593-940c-c181ca4d7836", 
-          "uuid": "7d52afba-71e1-4f8b-ac61-eef740eb08c6", 
+          "y": 9,
+          "x": 1145,
+          "destination": "373e0697-1b43-4593-940c-c181ca4d7836",
+          "uuid": "7d52afba-71e1-4f8b-ac61-eef740eb08c6",
           "actions": [
             {
               "msg": {
                 "eng": "@contact.name  We did not understand your ALERT. Please either resend or call your DSO immediately."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 120, 
-          "x": 293, 
-          "destination": "7ccd2e99-b349-4658-99ac-7802e9c9754e", 
-          "uuid": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
+          "y": 120,
+          "x": 293,
+          "destination": "7ccd2e99-b349-4658-99ac-7802e9c9754e",
+          "uuid": "5fde475f-0ae3-40b5-b916-b2df7542038a",
           "actions": [
             {
-              "action": "POST", 
-              "type": "api", 
+              "action": "POST",
+              "type": "api",
               "webhook": "http://52.18.125.4:8081/eidsr/case_alert.php?category=alert_all&report=@flow.suspected_report.text&reporter_phone=@contact.tel&reporter_name=@contact.name&reported_disease=@flow.suspected_report.category&reporter_rp_id=@contact.uuid&reporter_globalid=@contact.globalid"
-            }, 
+            },
             {
               "msg": {
                 "eng": "You have just reported a suspected case of @flow.suspected_report.category"
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
-            }, 
+            },
             {
               "msg": {
                 "eng": "Has the patient traveled out of the country in the last one month? Please answer with yes, no or don't know."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 713, 
-          "x": 367, 
-          "destination": "3cc0acab-43f5-4660-8595-79aca61cbfc2", 
-          "uuid": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
+          "y": 713,
+          "x": 367,
+          "destination": "3cc0acab-43f5-4660-8595-79aca61cbfc2",
+          "uuid": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
           "actions": [
             {
               "msg": {
                 "eng": "Did you collect a sample for this case alert? Please answer yes or no."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 869, 
-          "x": 128, 
-          "destination": null, 
-          "uuid": "fa73dc44-aabc-4f14-9f3d-2f31d8d7abca", 
+          "y": 869,
+          "x": 128,
+          "destination": null,
+          "uuid": "fa73dc44-aabc-4f14-9f3d-2f31d8d7abca",
           "actions": [
             {
               "msg": {
                 "eng": "Thank you for submitting this case alert for @flow.suspected_report.category! Your DSO and CSO will also receive a notification."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 1181, 
-          "x": 484, 
-          "destination": "7fd47f93-e0ca-44fe-aae3-9155f05e0661", 
-          "uuid": "885ee7b0-92cd-49a7-afa3-272d58735956", 
+          "y": 1181,
+          "x": 484,
+          "destination": "7fd47f93-e0ca-44fe-aae3-9155f05e0661",
+          "uuid": "885ee7b0-92cd-49a7-afa3-272d58735956",
           "actions": [
             {
               "msg": {
                 "eng": "@flow.suspected_report.category  requires that a specimen is collected. Please tell us why you did not collect a specimen."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 1469, 
-          "x": 595, 
-          "destination": null, 
-          "uuid": "8bc98bf5-d2ad-4abc-8a3a-1d874677e361", 
+          "y": 1469,
+          "x": 595,
+          "destination": null,
+          "uuid": "8bc98bf5-d2ad-4abc-8a3a-1d874677e361",
           "actions": [
             {
               "msg": {
                 "eng": "Thank you for submitting this case alert for @flow.suspected_report.category! Your DSO and CSO will also receive a notification."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 862, 
-          "x": 756, 
-          "destination": "3cc0acab-43f5-4660-8595-79aca61cbfc2", 
-          "uuid": "1fc0edef-54db-4bd3-941d-369121be9ce5", 
+          "y": 862,
+          "x": 756,
+          "destination": "3cc0acab-43f5-4660-8595-79aca61cbfc2",
+          "uuid": "1fc0edef-54db-4bd3-941d-369121be9ce5",
           "actions": [
             {
               "msg": {
                 "eng": "We do not understand your response. Did you collect a sample for this case? Please answer yes or no."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 470, 
-          "x": 770, 
-          "destination": "d76c21a7-b4f8-42e6-b4b8-f0d0639084ae", 
-          "uuid": "5015423c-6bcf-4803-ba50-07a92b2017ba", 
+          "y": 470,
+          "x": 770,
+          "destination": "d76c21a7-b4f8-42e6-b4b8-f0d0639084ae",
+          "uuid": "5015423c-6bcf-4803-ba50-07a92b2017ba",
           "actions": [
             {
               "msg": {
                 "eng": "Was this disease detected in a community? Please answer either Yes, No or don't know."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 707, 
-          "x": 1082, 
-          "destination": "d76c21a7-b4f8-42e6-b4b8-f0d0639084ae", 
-          "uuid": "5ab4bdee-5127-417c-8ee4-ec877748b249", 
+          "y": 707,
+          "x": 1082,
+          "destination": "d76c21a7-b4f8-42e6-b4b8-f0d0639084ae",
+          "uuid": "5ab4bdee-5127-417c-8ee4-ec877748b249",
           "actions": [
             {
               "msg": {
                 "eng": "We do not understand your response. Was the disease detected in a community? Please answer yes, no or don't know."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 305, 
-          "x": 1090, 
-          "destination": "7ccd2e99-b349-4658-99ac-7802e9c9754e", 
-          "uuid": "1b8e2875-45fa-48b9-accd-44f1bcbea46a", 
+          "y": 305,
+          "x": 1090,
+          "destination": "7ccd2e99-b349-4658-99ac-7802e9c9754e",
+          "uuid": "1b8e2875-45fa-48b9-accd-44f1bcbea46a",
           "actions": [
             {
               "msg": {
                 "eng": "We do not understand your response. Did the patient travel out of the country in the last month? Please answer yes, no or don't know."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
-        }, 
+        },
         {
-          "y": 1199, 
-          "x": 928, 
-          "destination": null, 
-          "uuid": "948104ab-d971-47de-8343-d420cf0f4eb1", 
+          "y": 1199,
+          "x": 928,
+          "destination": null,
+          "uuid": "948104ab-d971-47de-8343-d420cf0f4eb1",
           "actions": [
             {
               "msg": {
                 "eng": "Thank you for submitting this case alert for @flow.suspected_report.category! Your DSO and CSO will also receive a notification."
-              }, 
-              "media": {}, 
-              "send_all": false, 
+              },
+              "media": {},
+              "send_all": false,
               "type": "reply"
             }
           ]
         }
-      ], 
-      "version": 10, 
-      "flow_type": "F", 
-      "entry": "373e0697-1b43-4593-940c-c181ca4d7836", 
+      ],
+      "version": 10,
+      "flow_type": "F",
+      "entry": "373e0697-1b43-4593-940c-c181ca4d7836",
       "rule_sets": [
         {
-          "uuid": "373e0697-1b43-4593-940c-c181ca4d7836", 
+          "uuid": "373e0697-1b43-4593-940c-c181ca4d7836",
           "rules": [
             {
               "test": {
                 "test": {
                   "eng": "LF"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Lassa Fever"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "086757f1-f4f4-4d2a-8f92-f1ea25dcdc6e", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "086757f1-f4f4-4d2a-8f92-f1ea25dcdc6e",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Lassa"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Lassa Fever"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "e9472805-fad4-4051-9e77-5cbbe350bc68", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "e9472805-fad4-4051-9e77-5cbbe350bc68",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Lasa Fever"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Lassa Fever"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "d6507732-c388-44f0-aaba-d34f87af228b", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "d6507732-c388-44f0-aaba-d34f87af228b",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "L Fever"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Lassa Fever"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "da6340e9-710e-440f-b9c0-d19e3c433d12", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "da6340e9-710e-440f-b9c0-d19e3c433d12",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Ebola"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "VHF"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "5ae1b271-10d6-4707-b5e9-47e57fc11f83", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "5ae1b271-10d6-4707-b5e9-47e57fc11f83",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "VHF"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "VHF"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "4d7f7b21-bfa7-4023-84eb-7608ccfc0b66", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "4d7f7b21-bfa7-4023-84eb-7608ccfc0b66",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Yellow Fever"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yellow Fever"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "3d5c6667-e69d-408f-ab4a-2061e4e507cd", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "3d5c6667-e69d-408f-ab4a-2061e4e507cd",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "YF"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yellow Fever"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "04f9fabd-3a82-45b4-8ade-f99968d9ade9", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "04f9fabd-3a82-45b4-8ade-f99968d9ade9",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Maternal Death"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Maternal Death"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "92b8dd09-63f7-4897-b7eb-6b7d26f50b34", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "92b8dd09-63f7-4897-b7eb-6b7d26f50b34",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "MD"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Maternal Death"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "b083acd3-b41b-443e-aa0a-65a9d92a9642", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "b083acd3-b41b-443e-aa0a-65a9d92a9642",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Neonatal Death"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Neonatal Death"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "7e9358b7-73b4-4a46-b348-3bd8c0e5b8cc", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "7e9358b7-73b4-4a46-b348-3bd8c0e5b8cc",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "ND"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Neonatal Death"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "3923a5b4-6a1b-4b7b-8982-950406934bf6", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "3923a5b4-6a1b-4b7b-8982-950406934bf6",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Cholera"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Cholera"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "b7e9412f-d021-45dd-a3e2-2d3f555d430d", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "b7e9412f-d021-45dd-a3e2-2d3f555d430d",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "CH"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Cholera"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "a48f93a9-3f7d-4556-8142-a79595b827fb", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "a48f93a9-3f7d-4556-8142-a79595b827fb",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Cluster of Death"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Unexplained Cluster of Death"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "19cd07fa-ff56-4cd2-8f23-f5673a668742", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "19cd07fa-ff56-4cd2-8f23-f5673a668742",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "CD"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Unexplained Cluster of Death"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "ef4bda3c-dfeb-491b-addb-b41bdb2639ff", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "ef4bda3c-dfeb-491b-addb-b41bdb2639ff",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Cluster of Events"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Unexplained Cluster of Events"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "b72a4ac4-6eb7-4d3f-aecc-12e2b5d47d11", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "b72a4ac4-6eb7-4d3f-aecc-12e2b5d47d11",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "CE"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Unexplained Cluster of Events"
-              }, 
-              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a", 
-              "uuid": "ef12af6a-e469-4dbc-83ae-bbe716ffdad3", 
+              },
+              "destination": "5fde475f-0ae3-40b5-b916-b2df7542038a",
+              "uuid": "ef12af6a-e469-4dbc-83ae-bbe716ffdad3",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
-                "test": "true", 
+                "test": "true",
                 "type": "true"
-              }, 
+              },
               "category": {
                 "eng": "Other"
-              }, 
-              "destination": "7d52afba-71e1-4f8b-ac61-eef740eb08c6", 
-              "uuid": "42df148b-9fe4-41ed-bb33-9b609b29bc63", 
+              },
+              "destination": "7d52afba-71e1-4f8b-ac61-eef740eb08c6",
+              "uuid": "42df148b-9fe4-41ed-bb33-9b609b29bc63",
               "destination_type": "A"
             }
-          ], 
-          "ruleset_type": "wait_message", 
-          "label": "Suspected_Report", 
-          "operand": "@step.value", 
-          "finished_key": null, 
-          "response_type": "", 
-          "y": 0, 
-          "x": 41, 
+          ],
+          "ruleset_type": "wait_message",
+          "label": "Suspected_Report",
+          "operand": "@step.value",
+          "finished_key": null,
+          "response_type": "",
+          "y": 0,
+          "x": 41,
           "config": {}
-        }, 
+        },
         {
-          "uuid": "7ccd2e99-b349-4658-99ac-7802e9c9754e", 
+          "uuid": "7ccd2e99-b349-4658-99ac-7802e9c9754e",
           "rules": [
             {
               "test": {
                 "test": {
                   "eng": "Yes"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yes"
-              }, 
-              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba", 
-              "uuid": "d69ba1da-4be1-4e29-84bb-875652659089", 
+              },
+              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba",
+              "uuid": "d69ba1da-4be1-4e29-84bb-875652659089",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "y"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yes"
-              }, 
-              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba", 
-              "uuid": "08460bcc-7e24-4be2-b11d-aba3d8390dc9", 
+              },
+              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba",
+              "uuid": "08460bcc-7e24-4be2-b11d-aba3d8390dc9",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "ye"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yes"
-              }, 
-              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba", 
-              "uuid": "24164800-1f3d-4ee2-ba96-11c6c2282794", 
+              },
+              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba",
+              "uuid": "24164800-1f3d-4ee2-ba96-11c6c2282794",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "no"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "No"
-              }, 
-              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba", 
-              "uuid": "f3a81dd7-f8e2-4372-ab0d-14d7b27334dd", 
+              },
+              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba",
+              "uuid": "f3a81dd7-f8e2-4372-ab0d-14d7b27334dd",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "N"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "No"
-              }, 
-              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba", 
-              "uuid": "3aa982fa-2ddc-4db6-b583-5cb0e0b49333", 
+              },
+              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba",
+              "uuid": "3aa982fa-2ddc-4db6-b583-5cb0e0b49333",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "don't know"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Don't know"
-              }, 
-              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba", 
-              "uuid": "bf1d2fd9-2ed8-418b-905e-a966cd72592f", 
+              },
+              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba",
+              "uuid": "bf1d2fd9-2ed8-418b-905e-a966cd72592f",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "dont know"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Don't know"
-              }, 
-              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba", 
-              "uuid": "ee3cb2fa-be48-4f76-9db0-83b8e3e3a38c", 
+              },
+              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba",
+              "uuid": "ee3cb2fa-be48-4f76-9db0-83b8e3e3a38c",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "i don't know"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Don't know"
-              }, 
-              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba", 
-              "uuid": "22540141-0e57-4c03-942a-717f2af4e8d0", 
+              },
+              "destination": "5015423c-6bcf-4803-ba50-07a92b2017ba",
+              "uuid": "22540141-0e57-4c03-942a-717f2af4e8d0",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
-                "test": "true", 
+                "test": "true",
                 "type": "true"
-              }, 
+              },
               "category": {
                 "eng": "Other"
-              }, 
-              "destination": "1b8e2875-45fa-48b9-accd-44f1bcbea46a", 
-              "uuid": "f233fd60-caca-44b9-84b4-39c177bf9d97", 
+              },
+              "destination": "1b8e2875-45fa-48b9-accd-44f1bcbea46a",
+              "uuid": "f233fd60-caca-44b9-84b4-39c177bf9d97",
               "destination_type": "A"
             }
-          ], 
-          "ruleset_type": "wait_message", 
-          "label": "International_Travel", 
-          "operand": "@step.value", 
-          "finished_key": null, 
-          "response_type": "", 
-          "y": 302, 
-          "x": 640, 
+          ],
+          "ruleset_type": "wait_message",
+          "label": "International_Travel",
+          "operand": "@step.value",
+          "finished_key": null,
+          "response_type": "",
+          "y": 302,
+          "x": 640,
           "config": {}
-        }, 
+        },
         {
-          "uuid": "3cc0acab-43f5-4660-8595-79aca61cbfc2", 
+          "uuid": "3cc0acab-43f5-4660-8595-79aca61cbfc2",
           "rules": [
             {
               "test": {
                 "test": {
                   "eng": "yes ye y"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yes"
-              }, 
-              "destination": "fa73dc44-aabc-4f14-9f3d-2f31d8d7abca", 
-              "uuid": "9593fa6c-b4e4-4566-b569-cccd5278d969", 
+              },
+              "destination": "fa73dc44-aabc-4f14-9f3d-2f31d8d7abca",
+              "uuid": "9593fa6c-b4e4-4566-b569-cccd5278d969",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "no n"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "No"
-              }, 
-              "destination": "49f56565-71b5-470a-972f-aa88ae3d972c", 
-              "uuid": "f1359c20-e6c5-46c6-ad5e-87a23abe0466", 
+              },
+              "destination": "49f56565-71b5-470a-972f-aa88ae3d972c",
+              "uuid": "f1359c20-e6c5-46c6-ad5e-87a23abe0466",
               "destination_type": "R"
-            }, 
+            },
             {
               "test": {
-                "test": "true", 
+                "test": "true",
                 "type": "true"
-              }, 
+              },
               "category": {
                 "eng": "Other"
-              }, 
-              "destination": "1fc0edef-54db-4bd3-941d-369121be9ce5", 
-              "uuid": "ea2ba6d9-9310-408f-9c15-17919b408812", 
+              },
+              "destination": "1fc0edef-54db-4bd3-941d-369121be9ce5",
+              "uuid": "ea2ba6d9-9310-408f-9c15-17919b408812",
               "destination_type": "A"
             }
-          ], 
-          "ruleset_type": "wait_message", 
-          "label": "Sample_Collected", 
-          "operand": "@step.value", 
-          "finished_key": null, 
-          "response_type": "", 
-          "y": 870, 
-          "x": 383, 
+          ],
+          "ruleset_type": "wait_message",
+          "label": "Sample_Collected",
+          "operand": "@step.value",
+          "finished_key": null,
+          "response_type": "",
+          "y": 870,
+          "x": 383,
           "config": {}
-        }, 
+        },
         {
-          "uuid": "49f56565-71b5-470a-972f-aa88ae3d972c", 
+          "uuid": "49f56565-71b5-470a-972f-aa88ae3d972c",
           "rules": [
             {
               "test": {
                 "test": {
                   "eng": "LF Lassa Lasa"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Lassa Fever"
-              }, 
-              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956", 
-              "uuid": "b1dc1752-dced-4fc3-9d80-41cf3517a352", 
+              },
+              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956",
+              "uuid": "b1dc1752-dced-4fc3-9d80-41cf3517a352",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "L Fever"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Lassa Fever"
-              }, 
-              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956", 
-              "uuid": "9b6af3e9-67ad-43fb-890a-8de09dc88c2c", 
+              },
+              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956",
+              "uuid": "9b6af3e9-67ad-43fb-890a-8de09dc88c2c",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Ebola"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Ebola"
-              }, 
-              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956", 
-              "uuid": "fdd14eeb-f6f8-479f-9b4d-d8e3a90cd811", 
+              },
+              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956",
+              "uuid": "fdd14eeb-f6f8-479f-9b4d-d8e3a90cd811",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "YF"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yellow Fever"
-              }, 
-              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956", 
-              "uuid": "bafb096f-031f-44a4-9160-7dee527ba549", 
+              },
+              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956",
+              "uuid": "bafb096f-031f-44a4-9160-7dee527ba549",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Yellow Fever"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yellow Fever"
-              }, 
-              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956", 
-              "uuid": "74ad2edd-ffde-4ff9-a93f-4776518815cf", 
+              },
+              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956",
+              "uuid": "74ad2edd-ffde-4ff9-a93f-4776518815cf",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Meningitis Meningits"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Meningitis"
-              }, 
-              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956", 
-              "uuid": "56c7a5e4-bebc-46f3-bdfc-6426337852f5", 
+              },
+              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956",
+              "uuid": "56c7a5e4-bebc-46f3-bdfc-6426337852f5",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Men"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Meningitis"
-              }, 
-              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956", 
-              "uuid": "f10a4a74-1456-46aa-aa8b-9f646b5452d5", 
+              },
+              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956",
+              "uuid": "f10a4a74-1456-46aa-aa8b-9f646b5452d5",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "AFP"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "AFP"
-              }, 
-              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956", 
-              "uuid": "90000ed5-a446-427d-97c0-113e6494f8d4", 
+              },
+              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956",
+              "uuid": "90000ed5-a446-427d-97c0-113e6494f8d4",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "Rabies HR Human"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Rabies"
-              }, 
-              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956", 
-              "uuid": "349b3555-b15b-4228-9162-8efe097cc984", 
+              },
+              "destination": "885ee7b0-92cd-49a7-afa3-272d58735956",
+              "uuid": "349b3555-b15b-4228-9162-8efe097cc984",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
-                "test": "true", 
+                "test": "true",
                 "type": "true"
-              }, 
+              },
               "category": {
                 "eng": "Other"
-              }, 
-              "destination": "948104ab-d971-47de-8343-d420cf0f4eb1", 
-              "uuid": "c3b22222-5a4b-454d-990a-7d5053853b92", 
+              },
+              "destination": "948104ab-d971-47de-8343-d420cf0f4eb1",
+              "uuid": "c3b22222-5a4b-454d-990a-7d5053853b92",
               "destination_type": "A"
             }
-          ], 
-          "ruleset_type": "flow_field", 
-          "label": "Response 4", 
-          "operand": "@flow.suspected_report", 
-          "finished_key": null, 
-          "response_type": "", 
-          "y": 1045, 
-          "x": 289, 
+          ],
+          "ruleset_type": "flow_field",
+          "label": "Response 4",
+          "operand": "@flow.suspected_report",
+          "finished_key": null,
+          "response_type": "",
+          "y": 1045,
+          "x": 289,
           "config": {}
-        }, 
+        },
         {
-          "uuid": "7fd47f93-e0ca-44fe-aae3-9155f05e0661", 
+          "uuid": "7fd47f93-e0ca-44fe-aae3-9155f05e0661",
           "rules": [
             {
               "test": {
-                "test": {}, 
+                "test": {},
                 "type": "not_empty"
-              }, 
+              },
               "category": {
                 "eng": "Reason No Specimen"
-              }, 
-              "destination": "8bc98bf5-d2ad-4abc-8a3a-1d874677e361", 
-              "uuid": "5734bac6-d88b-4f9e-86be-69cee08b555a", 
+              },
+              "destination": "8bc98bf5-d2ad-4abc-8a3a-1d874677e361",
+              "uuid": "5734bac6-d88b-4f9e-86be-69cee08b555a",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
-                "test": "true", 
+                "test": "true",
                 "type": "true"
-              }, 
+              },
               "category": {
                 "eng": "Other"
-              }, 
-              "destination": "8bc98bf5-d2ad-4abc-8a3a-1d874677e361", 
-              "uuid": "c6253571-8559-43c1-82bb-7e73b94ea063", 
+              },
+              "destination": "8bc98bf5-d2ad-4abc-8a3a-1d874677e361",
+              "uuid": "c6253571-8559-43c1-82bb-7e73b94ea063",
               "destination_type": "A"
             }
-          ], 
-          "ruleset_type": "wait_message", 
-          "label": "Reason_Specimen_Not_Collected", 
-          "operand": "@step.value", 
-          "finished_key": null, 
-          "response_type": "", 
-          "y": 1373, 
-          "x": 465, 
+          ],
+          "ruleset_type": "wait_message",
+          "label": "Reason_Specimen_Not_Collected",
+          "operand": "@step.value",
+          "finished_key": null,
+          "response_type": "",
+          "y": 1373,
+          "x": 465,
           "config": {}
-        }, 
+        },
         {
-          "uuid": "d76c21a7-b4f8-42e6-b4b8-f0d0639084ae", 
+          "uuid": "d76c21a7-b4f8-42e6-b4b8-f0d0639084ae",
           "rules": [
             {
               "test": {
                 "test": {
                   "eng": "yes"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yes"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "2555418b-23a1-4055-a1db-d7c08a887fa4", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "2555418b-23a1-4055-a1db-d7c08a887fa4",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "ye"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yes"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "1a607c10-e685-4e5c-9378-c6ebddbd2492", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "1a607c10-e685-4e5c-9378-c6ebddbd2492",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "y"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Yes"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "ca43fa84-ec0f-45ea-a5fa-a5913afc9b26", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "ca43fa84-ec0f-45ea-a5fa-a5913afc9b26",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "no"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "No"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "e44843b7-61a7-471c-a3a2-62062f3452c5", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "e44843b7-61a7-471c-a3a2-62062f3452c5",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "n"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "No"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "25ab57e7-88d7-42a2-aeaf-47e339e8f4f4", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "25ab57e7-88d7-42a2-aeaf-47e339e8f4f4",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "not sure"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Don't Know"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "a6ec4678-ad0d-457c-9a4c-b481a9f34bca", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "a6ec4678-ad0d-457c-9a4c-b481a9f34bca",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "ns"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Don't Know"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "05dbeec0-b041-48d7-bdf8-20b3a6643fba", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "05dbeec0-b041-48d7-bdf8-20b3a6643fba",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "I don't know"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Don't Know"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "419923da-5d48-4043-a8f9-2a808065226b", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "419923da-5d48-4043-a8f9-2a808065226b",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "dont know"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Don't Know"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "384433cd-b8c5-4af3-bbfc-ed9deef3157d", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "384433cd-b8c5-4af3-bbfc-ed9deef3157d",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "I dont know"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Don't Know"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "232e39c0-ea42-4dd8-a7bf-7704873bb697", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "232e39c0-ea42-4dd8-a7bf-7704873bb697",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
                 "test": {
                   "eng": "don't know"
-                }, 
+                },
                 "type": "contains_any"
-              }, 
+              },
               "category": {
                 "eng": "Don't Know"
-              }, 
-              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25", 
-              "uuid": "d7f6ac8d-1562-4ce9-a713-023b4b7303a5", 
+              },
+              "destination": "b83d2a0e-dace-4105-aabd-f7b5f4b00c25",
+              "uuid": "d7f6ac8d-1562-4ce9-a713-023b4b7303a5",
               "destination_type": "A"
-            }, 
+            },
             {
               "test": {
-                "test": "true", 
+                "test": "true",
                 "type": "true"
-              }, 
+              },
               "category": {
                 "eng": "Other"
-              }, 
-              "destination": "5ab4bdee-5127-417c-8ee4-ec877748b249", 
-              "uuid": "73026a27-5197-4c6f-b7f7-24f4add08022", 
+              },
+              "destination": "5ab4bdee-5127-417c-8ee4-ec877748b249",
+              "uuid": "73026a27-5197-4c6f-b7f7-24f4add08022",
               "destination_type": "A"
             }
-          ], 
-          "ruleset_type": "wait_message", 
-          "label": "Community_Detection", 
-          "operand": "@step.value", 
-          "finished_key": null, 
-          "response_type": "", 
-          "y": 652, 
-          "x": 643, 
+          ],
+          "ruleset_type": "wait_message",
+          "label": "Community_Detection",
+          "operand": "@step.value",
+          "finished_key": null,
+          "response_type": "",
+          "y": 652,
+          "x": 643,
           "config": {}
         }
-      ], 
+      ],
       "metadata": {
-        "uuid": "41a3fca6-f721-4c73-a892-750672b15c3a", 
-        "notes": [], 
-        "expires": 10080, 
-        "name": "mHero eIDSR Validation", 
-        "saved_on": "2017-04-16T20:10:02.350081Z", 
+        "uuid": "41a3fca6-f721-4c73-a892-750672b15c3a",
+        "notes": [],
+        "expires": 10080,
+        "name": "mHero eIDSR",
+        "saved_on": "2017-04-16T20:10:02.350081Z",
         "revision": 114
       }
     }
-  ], 
+  ],
   "triggers": [
     {
-      "trigger_type": "K", 
+      "trigger_type": "K",
       "flow": {
-        "name": "mHero eIDSR Validation", 
+        "name": "mHero eIDSR",
         "uuid": "41a3fca6-f721-4c73-a892-750672b15c3a"
-      }, 
-      "groups": [], 
-      "keyword": "alert", 
+      },
+      "groups": [],
+      "keyword": "alert",
       "channel": null
     }
   ]
