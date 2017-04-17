@@ -1,7 +1,7 @@
 <?php
 class eidsr {
   function __construct( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
-                        $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$broadcast_flow_uuid,$channel,$reported_disease
+                        $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease
                        ) {
     $this->reporter_phone = $reporter_phone;
     $this->reporter_name = $reporter_name;
@@ -10,9 +10,7 @@ class eidsr {
     $this->reporter_rp_id = $reporter_rp_id;
     $this->reporter_globalid = $reporter_globalid;
     $this->rapidpro_token = $rapidpro_token;
-    $this->broadcast_flow_uuid = $broadcast_flow_uuid;
     $this->rapidpro_host = $rapidpro_url;
-    $this->channel = $channel;
     $this->csd_host = $csd_host;
     $this->csd_user = $csd_user;
     $this->csd_passwd = $csd_passwd;
@@ -419,9 +417,7 @@ $reporter_rp_id = $_REQUEST["reporter_rp_id"];
 $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
 $rapidpro_token = "";
-$broadcast_flow_uuid = "d491bc11-35ff-4f65-a2d8-ae51d0ed9288";
 $rapidpro_url = "https://app.rapidpro.io/";
-$channel = "80ab406b-1a6b-44d5-ad0c-26866bfa844b";//optional
 $csd_host = "http://localhost:8984/CSD/";
 $csd_user = "csd";
 $csd_passwd = "csd";
@@ -433,7 +429,7 @@ $eidsr_passwd = "";
 
 $report = str_ireplace("alert.","",$report);
 $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
-                    $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$broadcast_flow_uuid,$channel,$reported_disease
+                    $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease
                   );
 
 if($category == "alert_all") {
