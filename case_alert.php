@@ -53,7 +53,7 @@ class eidsr {
     }
   }
 
-  public static function get_provider_facility($provider_uuid) {
+  public function get_provider_facility($provider_uuid) {
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
           <csd:id entityID="'.$provider_uuid.'">
           </csd:id>
@@ -433,7 +433,7 @@ $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$repo
                   );
 
 if($category == "alert_all") {
-  $eidsr->notify_group = array("DPC Group","Assistant Ministers");
+  $eidsr->notify_group = array("DPC Group");
   $eidsr->validate_report();
   $eidsr->alert_all();
 }
