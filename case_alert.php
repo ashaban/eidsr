@@ -405,8 +405,10 @@ $category = $_REQUEST["category"];
 if($category == "query") {
   if($_REQUEST["query_type"] == "provider_facility" and $_REQUEST["reporter_globalid"]) {
     $reporter_facility = eidsr::get_provider_facility($_REQUEST["reporter_globalid"]);
-    return '{"facility":"'.$reporter_facility["name"].'"}';
+    echo '{"facility":"'.$reporter_facility["name"].'"}';
   }
+else
+echo '{"facility":"Unknown"}';
 return;
 }
 $reporter_phone = $_REQUEST["reporter_phone"];
