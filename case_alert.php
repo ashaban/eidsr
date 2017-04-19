@@ -257,19 +257,19 @@ class eidsr {
     $report = explode(".",$this->report);
     $possible_alive_outcomes = array("alive","alve","aliv","ali","alv");
     $possible_dead_outcomes = array("dead","dea","de","ded","dd","da");
-    $possible_specimen = array("yes","ye","y");
+    $possible_specimen = array("Yes","No");
     $this->specimen = "";
     if(count($report)>1 and is_numeric($report[1])) {
       $this->caseid = $report[1];
     }
     else if (!$this->caseid and count($report)>1 and in_array(strtolower($report[1]),$possible_specimen)) {
-      $this->specimen = true;
+      $this->specimen = $report[1];
     }
     if(!$this->caseid and count($report)>2 and is_numeric($report[2])) {
       $this->caseid = $report[2];
     }
     else if(!$this->specimen and count($report)>2 and in_array(strtolower($report[2]),$possible_specimen)) {
-      $this->specimen = true;
+      $this->specimen = $report[2];
     }
   }
 
@@ -361,7 +361,7 @@ class eidsr {
                     "facilityCode":"'.$this->reporter_facility["code"].'",
                     "diseaseOrCondition":"'.$this->reported_disease.'",
                     "caseId":"'.$this->caseid.'",
-                    "sampleCollected"
+                    "specimenCollected":"'.$this->specimen.'"
                   }';
     error_log($post_data);
     $response = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header);
