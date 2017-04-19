@@ -356,15 +356,15 @@ class eidsr {
       $idsrid = $county_code."-".$this->reporter_facility["code"]."-".$this->caseid;
     }
     $post_data = '{
-                    "reportingPerson":"'.$this->reporter_name.'",
-                    "reportingPhoneNumber":"'.$this->reporter_phone.'",
-                    "facilityUID":"'.$dhis2_facility_uid.'",
+                    "reportingPersonName":"'.$this->reporter_name.'",
+                    "reportingPersonPhoneNumber":"'.$this->reporter_phone.'",
                     "facilityCode":"'.$this->reporter_facility["code"].'",
-                    "facilityName":"'.$this->reporter_facility["name"].'",
-                    "diseaseName":"'.$this->reported_disease.'"
+                    "diseaseOrCondition":"'.$this->reported_disease.'",
+                    "caseId":"'.$this->caseid.'"
                   }';
     error_log($post_data);
-    //$this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header);
+    $data = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header);
+    print_r($data);
   }
 
   public function exec_request($url,$user,$password,$req_type,$post_data,$header = Array("Content-Type: text/xml")) {
