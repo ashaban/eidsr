@@ -341,7 +341,7 @@ class eidsr {
       foreach($contacts_uuid as $uuid) {
         $post_data = '{ "contacts": ["'.$uuid.'"], "text": "'.$msg.'" }';
         error_log($post_data);
-      $this->exec_request($url,"","","POST",$post_data,$header);
+      //$this->exec_request($url,"","","POST",$post_data,$header);
       }
   }
 
@@ -400,9 +400,12 @@ class eidsr {
     curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
     if($get_header)
     curl_setopt($curl, CURLOPT_HEADER, true);
-    if($req_type=="POST" or $req_type=="PUT") {
-      $req_type = '".$req_type."';
-      curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $req_type);
+    if($req_type == "POST") {
+      curl_setopt($curl, CURLOPT_POST, true);
+      curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
+    }
+    else if($req_type == "PUT") {
+      curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
       curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
     }
     if($user or $password)
@@ -441,8 +444,8 @@ $rapidpro_url = "https://app.rapidpro.io/";
 $csd_host = "http://localhost:8984/CSD/";
 $csd_user = "csd";
 $csd_passwd = "csd";
-$csd_doc = "liberia";
-$rp_csd_doc = "mhero_liberia_rapidpro";
+$csd_doc = "mhero_blank_ihris";
+$rp_csd_doc = "mhero_blank_rapidpro";
 $eidsr_host = "https://lib-eidsr-dev.ehealthafrica.org/casealert";
 $eidsr_user = "";
 $eidsr_passwd = "";
