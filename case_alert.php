@@ -257,7 +257,7 @@ class eidsr {
     $report = explode(".",$this->report);
     $possible_alive_outcomes = array("alive","alve","aliv","ali","alv");
     $possible_dead_outcomes = array("dead","dea","de","ded","dd","da");
-    $possible_specimen = array("Yes","No");
+    $possible_specimen = array("yes","no");
     $this->specimen = "";
     if(count($report)>1 and is_numeric($report[1])) {
       $this->caseid = $report[1];
@@ -364,33 +364,36 @@ class eidsr {
                     "specimenCollected":"'.$this->specimen.'"
                   }';
     error_log($post_data);
-    $response = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header);
+    $response = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header,true);
     $response = explode("\r\n",$response);
     foreach($response as $resp) {
       if(substr($resp,0,8) == "Location") {
         $trackerid = str_ireplace ("Location: /casealert/","",$resp);
+        error_log('{"trackerid":"'.$trackerid.'"}');
         echo '{"trackerid":"'.$trackerid.'"}';
+        return;
       }
     }
   }
 
   public function update_syncserver() {
     if($this->community_detection)
-    $comm_det = '"communityLevelDetection":"'.$this->community_detection.'",';
+    $comm_det = '"communityLevelDetection":"'.$this->community_detection.'"';
     if($this->international_travel)
-    $inter_trav = '"crossedBorder":"'.$this->international_travel.'",';
+    $inter_trav = '"crossedBorder":"'.$this->international_travel.'"';
     if($this->reason_no_specimen)
-    $reason_no_specimen = '"comments":"'.$this->reason_no_specimen.'",';
+    $reason_no_specimen = '"comments":"'.$this->reason_no_specimen.'"';
     if($this->specimen_collected)
-    $specimen_collected = '"specimenCollected":"'.$this->specimen_collected.'",';
+    $specimen_collected = '"specimenCollected":"'.$this->specimen_collected.'"';
 
     $post_data = '{'.$comm_det.$inter_trav.$reason_no_specimen.$specimen_collected.'}';
     error_log($post_data);
-    $url = $this->eidsr_host."/".$trackerid;
+    $url = $this->eidsr_host."/".$this->trackerid;
     $header = Array(
                     "Content-Type: application/json"
                    );
     $response = $this->exec_request($url,$this->eidsr_user,$this->eidsr_passwd,"PUT",$post_data,$header);
+    error_log($response);
   }
 
   public function exec_request($url,$user,$password,$req_type,$post_data,$header = Array("Content-Type: text/xml"),$get_header=false) {
