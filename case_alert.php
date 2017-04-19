@@ -258,7 +258,7 @@ class eidsr {
     $possible_alive_outcomes = array("alive","alve","aliv","ali","alv");
     $possible_dead_outcomes = array("dead","dea","de","ded","dd","da");
     $possible_specimen = array("yes","ye","y");
-    $this->specimen = false;
+    $this->specimen = "";
     if(count($report)>1 and is_numeric($report[1])) {
       $this->caseid = $report[1];
     }
@@ -310,7 +310,7 @@ class eidsr {
     }
 
     //send data to offline tracker
-    $this->send_to_eidsr();
+    $this->send_to_syncserver();
   }
 
   public function start_flow($flow_uuid,$group_uuid,$contacts_uuid = array(),$extra) {
@@ -345,7 +345,7 @@ class eidsr {
       }
   }
 
-  public function send_to_eidsr() {
+  public function send_to_syncserver() {
     $dhis2_facility_uid = $this->get_dhis2_facility_uid($this->reporter_facility["uuid"]);
     $header = Array(
                     "Content-Type: application/json"
@@ -360,20 +360,49 @@ class eidsr {
                     "reportingPersonPhoneNumber":"'.$this->reporter_phone.'",
                     "facilityCode":"'.$this->reporter_facility["code"].'",
                     "diseaseOrCondition":"'.$this->reported_disease.'",
-                    "caseId":"'.$this->caseid.'"
+                    "caseId":"'.$this->caseid.'",
+                    "sampleCollected"
                   }';
     error_log($post_data);
-    $data = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header);
-    print_r($data);
+    $response = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header);
+    $response = explode("\r\n",$response);
+    foreach($response as $resp) {
+      if(substr($resp,0,8) == "Location") {
+        $trackerid = str_ireplace ("Location: /casealert/","",$resp);
+        echo '{"trackerid":"'.$trackerid.'"}';
+      }
+    }
   }
 
-  public function exec_request($url,$user,$password,$req_type,$post_data,$header = Array("Content-Type: text/xml")) {
+  public function update_syncserver() {
+    if($this->community_detection)
+    $comm_det = '"communityLevelDetection":"'.$this->community_detection.'",';
+    if($this->international_travel)
+    $inter_trav = '"crossedBorder":"'.$this->international_travel.'",';
+    if($this->reason_no_specimen)
+    $reason_no_specimen = '"comments":"'.$this->reason_no_specimen.'",';
+    if($this->specimen_collected)
+    $specimen_collected = '"specimenCollected":"'.$this->specimen_collected.'",';
+
+    $post_data = '{'.$comm_det.$inter_trav.$reason_no_specimen.$specimen_collected.'}';
+    error_log($post_data);
+    $url = $this->eidsr_host."/".$trackerid;
+    $header = Array(
+                    "Content-Type: application/json"
+                   );
+    $response = $this->exec_request($url,$this->eidsr_user,$this->eidsr_passwd,"PUT",$post_data,$header);
+  }
+
+  public function exec_request($url,$user,$password,$req_type,$post_data,$header = Array("Content-Type: text/xml"),$get_header=false) {
     $curl =  curl_init($url);
     curl_setopt($curl, CURLOPT_HEADER, false);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
-    if($req_type=="POST") {
-      curl_setopt($curl, CURLOPT_POST, true);
+    if($get_header)
+    curl_setopt($curl, CURLOPT_HEADER, true);
+    if($req_type=="POST" or $req_type=="PUT") {
+      $req_type = '".$req_type."';
+      curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $req_type);
       curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
     }
     if($user or $password)
@@ -427,6 +456,14 @@ if($category == "alert_all") {
   $eidsr->notify_group = array("DPC Group");
   $eidsr->validate_report();
   $eidsr->alert_all();
+}
+if($category == "update") {
+  $eidsr->community_detection = $_REQUEST["community_detection"];
+  $eidsr->international_travel = $_REQUEST["international_travel"];
+  $eidsr->specimen_collected = $_REQUEST["specimen_collected"];
+  $eidsr->reason_no_specimen = $_REQUEST["reason_no_specimen"];
+  $eidsr->trackerid = $_REQUEST["trackerid"];
+  $eidsr->update_syncserver();
 }
 if($category == "query") {
   if($_REQUEST["query_type"] == "provider_facility" and $_REQUEST["reporter_globalid"]) {
