@@ -19,8 +19,8 @@ class eidsr {
     $this->eidsr_host = $eidsr_host;
     $this->eidsr_user = $eidsr_user;
     $this->eidsr_passwd = $eidsr_passwd;
-    $this->reporter_facility = $this->get_provider_facility($this->reporter_globalid);
-    $this->county_uuid = $this->get_county_uuid($this->reporter_facility["parent"]);
+    $this->facility_details = $this->get_provider_facility($this->reporter_globalid);
+    $this->county_uuid = $this->facility_details["county_uuid"];
   }
 
   public function get_contacts_in_grp ($group_name) {
@@ -61,26 +61,65 @@ class eidsr {
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
     $prov_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $fac_uuid = $this->extract($prov_entity,"/csd:provider/csd:facilities/csd:facility/@entityID",'providerDirectory',true);
+    $fac_det = $this->get_facility_details ($fac_uuid,"uuid");
+    return $fac_det;
+  }
 
-    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-          <csd:id entityID="'.$fac_uuid.'">
-          </csd:id>
-        </csd:requestParams>';
+  public function get_facility_details ($facility_identifier,$type) {
+    if($type == "code") {
+      $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+             <csd:otherID code="'.$facility_identifier.'" assigningAuthorityName="">
+             </csd:id>
+            </csd:requestParams>';
+    }
+    else if ($type == "uuid") {
+      $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+             <csd:id entityID="'.$facility_identifier.'">
+             </csd:id>
+            </csd:requestParams>';
+    }
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:facility-search";
     $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    $fac_name = $this->extract($fac_entity,"/csd:facility/csd:primaryName",'facilityDirectory',true);
-    $fac_parent = $this->extract($fac_entity,"/csd:facility/csd:organizations/csd:organization/@entityID",'facilityDirectory',true);
+    $facility_uuid = $this->extract($fac_entity,"/csd:facility/@entityID",'facilityDirectory',true);
+    $facility_name = $this->extract($fac_entity,"/csd:facility/csd:primaryName",'facilityDirectory',true);
+    $facility_code = $this->extract($fac_entity,"/csd:facility/csd:otherID[@code='code']",'facilityDirectory',true);
+    $district_uuid = $this->extract($fac_entity,"/csd:facility/csd:organizations/csd:organization/@entityID",'facilityDirectory',true);
 
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-          <csd:id entityID="'.$fac_uuid.'"/>
-          <csd:otherID position="3"/>
+          <csd:id entityID="'.$district_uuid.'">
+          </csd:id>
         </csd:requestParams>';
-    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:facility_read_otherid";
-    $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    $fac_code = $this->extract($fac_entity,"/csd:facility/csd:otherID",'facilityDirectory',true);
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:organization-search";
+    $org_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $county_uuid = $this->extract($org_entity,"/csd:organization/csd:parent/@entityID",'organizationDirectory',true);
+    $district_name = $this->extract($org_entity,"/csd:organization/csd:primaryName",'organizationDirectory',true);
 
-    $fac = array("uuid"=>$fac_uuid,"code"=>$fac_code,"name"=>$fac_name,"parent"=>$fac_parent);
-    return $fac;
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+          <csd:id entityID="'.$county_uuid.'">
+          </csd:id>
+        </csd:requestParams>';
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:organization-search";
+    $org_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $county_name = $this->extract($org_entity,"/csd:organization/csd:primaryName",'organizationDirectory',true);
+
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+            <csd:id entityID="'.$county_uuid.'"/>
+            <csd:otherID position="1"/>
+          </csd:requestParams>';
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:organization_read_otherid";
+    $org_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $county_code = $this->extract($org_entity,"/csd:organization/csd:otherID",'organizationDirectory',true);
+
+    $fac_det = array("facility_uuid"=>$facility_uuid,
+                  "facility_name"=>$facility_name,
+                  "facility_code"=>$facility_code,
+                  "district_uuid"=>$district_uuid,
+                  "district_name"=>$district_name,
+                  "county_uuid"=>$county_uuid,
+                  "county_name"=>$county_name,
+                  "county_code"=>$county_code
+                 );
+    return $fac_det;
   }
 
   public function get_dhis2_facility_uid($facility_uuid) {
@@ -94,30 +133,8 @@ class eidsr {
     return $dhis2_fac_uid;
   }
 
-  public function get_county_uuid($district_uuid) {
-    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-          <csd:id entityID="'.$district_uuid.'">
-          </csd:id>
-        </csd:requestParams>';
-    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:organization-search";
-    $org_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    $county_uuid = $this->extract($org_entity,"/csd:organization/csd:parent/@entityID",'organizationDirectory',true);
-    return $county_uuid;
-  }
-
-  public function get_county_code($county_uuid) {
-    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-          <csd:id entityID="'.$county_uuid.'"/>
-          <csd:otherID position="1"/>
-        </csd:requestParams>';
-    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:organization_read_otherid";
-    $org_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    $org_uuid = $this->extract($org_entity,"/csd:organization/csd:otherID",'organizationDirectory',true);
-    return $org_uuid;
-  }
-
   public function get_dso() {
-    $district_uuid = $this->reporter_facility["parent"];
+    $district_uuid = $this->facility_details["district_uuid"];
     if(!$district_uuid) {
       error_log("District UUID Missing,DSO wont be alerted");
       return array();
@@ -145,7 +162,9 @@ class eidsr {
       $prov_entity = new SimpleXMLElement($prov_entity);
       foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
         global $dso;
-        if($prov->extension->position == "District Surveillance Officer" or $prov->extension->position == "Surveillance Officer" or $prov->extension->position == "DSO"){
+        if( $prov->extension->position == "District Surveillance Officer" or
+            $prov->extension->position == "Surveillance Officer" or
+            $prov->extension->position == "DSO"){
           $curr_dso = $dso;
           if(count($curr_dso)==0)
             $curr_dso = array();
@@ -253,10 +272,13 @@ class eidsr {
     return $rp_ids;
   }
 
+  public static function trim_values(&$value) {
+    $value = trim($value);
+  }
+
   public function validate_report() {
     $report = explode(".",$this->report);
-    $possible_alive_outcomes = array("alive","alve","aliv","ali","alv");
-    $possible_dead_outcomes = array("dead","dea","de","ded","dd","da");
+    array_walk($report,'eidsr::trim_values');
     $possible_specimen = array("yes","no");
     $this->specimen = "";
     if(count($report)>1 and is_numeric($report[1])) {
@@ -281,7 +303,7 @@ class eidsr {
       $cont_alert = array_merge($cont_alert,$other_contacts);
     }
     //alert all partners
-    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.".";
+    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]." By ".$this->reporter_name.".";
     if($this->specimen)
     $msg .= "A sample was also taken for Riders to pick";
     $this->broadcast($cont_alert,$msg);
@@ -289,7 +311,7 @@ class eidsr {
     //alert CSO
     $cso = $this->get_cso();
     $cont_alert = $this->get_rapidpro_id($cso);
-    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name.". Please verify with DSO";
+    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]." By ".$this->reporter_name.". Please verify with DSO";
     if($this->specimen)
     $msg .= ".A sample was also taken for Riders to pick";
     $this->broadcast($cont_alert,$msg);
@@ -297,7 +319,7 @@ class eidsr {
     //alert DSO
     $dso = $this->get_dso();
     $cont_alert = $this->get_rapidpro_id($dso);
-    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." By ".$this->reporter_name."(".$this->reporter_phone."). Please call or visit health facility to verify";
+    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]." By ".$this->reporter_name."(".$this->reporter_phone."). Please call or visit health facility to verify";
     if($this->specimen)
     $msg .= ".A sample was also taken for Riders to pick";
     $this->broadcast($cont_alert,$msg);
@@ -305,7 +327,7 @@ class eidsr {
     //if sample collected then alert Riders dispatch
     if($this->specimen) {
       $riders_contacts = $this->get_contacts_in_grp(urlencode("Riders Dispatch"));
-      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->reporter_facility["name"]." Facility. Sample is available at this facility for you to pick";
+      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]." Facility. Sample is available at this facility for you to pick";
       $this->broadcast($riders_contacts,$msg);
     }
 
@@ -345,26 +367,37 @@ class eidsr {
       }
   }
 
+  public function get_reported_cases(){
+    $reported_cases = file_get_contents("reported_cases.json");
+
+  }
+
   public function send_to_syncserver() {
-    $dhis2_facility_uid = $this->get_dhis2_facility_uid($this->reporter_facility["uuid"]);
+    $dhis2_facility_uid = $this->get_dhis2_facility_uid($this->facility_details["facility_uuid"]);
     $header = Array(
                     "Content-Type: application/json"
                    );
-    if($this->caseid and $this->reporter_facility["code"]){
-      $county_code = $this->get_county_code($this->county_uuid);
-      if($county_code)
-      $idsrid = $county_code."-".$this->reporter_facility["code"]."-".$this->caseid;
-    }
+    $idsrid = $this->facility_details["county_code"]."-".$this->facility_details["facility_code"]."-".$this->caseid;
     $post_data = '{
                     "reportingPersonName":"'.$this->reporter_name.'",
                     "reportingPersonPhoneNumber":"'.$this->reporter_phone.'",
-                    "facilityCode":"'.$this->reporter_facility["code"].'",
+                    "facilityCode":"'.$this->facility_details["facility_code"].'",
                     "diseaseOrCondition":"'.$this->reported_disease.'",
                     "caseId":"'.$this->caseid.'",
                     "specimenCollected":"'.$this->specimen.'"
                   }';
     error_log($post_data);
     $response = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header,true);
+
+    $reported_cases = file_get_contents("reported_cases.json");
+    $reported_cases = json_decode($reported_cases,true);
+    $total_cases = count($reported_cases);
+    $reported_cases[$total_cases] = array("disease_name"=>$this->reported_disease,
+                                          "idsr_id"=>$idsrid,
+                                          "facility_code"=>$this->facility_details["facility_code"]
+                                         );
+    $reported_cases = json_encode($reported_cases,true);
+    file_put_contents("reported_cases.json",$reported_cases);
     $response = explode("\r\n",$response);
     foreach($response as $resp) {
       if(substr($resp,0,8) == "Location") {
@@ -435,6 +468,7 @@ class eidsr {
 }
 
 
+require("config.php");
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
@@ -442,17 +476,8 @@ $reported_disease = $_REQUEST["reported_disease"];
 $reporter_rp_id = $_REQUEST["reporter_rp_id"];
 $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
-$rapidpro_token = "";
-$rapidpro_url = "https://app.rapidpro.io/";
-$csd_host = "http://localhost:8984/CSD/";
-$csd_user = "csd";
-$csd_passwd = "csd";
-$csd_doc = "mhero_blank_ihris";
-$rp_csd_doc = "mhero_blank_rapidpro";
-$eidsr_host = "https://lib-eidsr-dev.ehealthafrica.org/casealert";
-$eidsr_user = "";
-$eidsr_passwd = "";
 
+require("test_config.php");
 $report = str_ireplace("alert.","",$report);
 $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
                     $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease
