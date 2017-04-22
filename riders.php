@@ -12,6 +12,7 @@ class riders extends eidsr_base {
     $reported_cases = file_get_contents("reported_cases.json");
     $reported_cases = json_decode($reported_cases,true);
     $samples = str_ireplace("picked","",$this->samples);
+    $samples = str_ireplace("delivered","",$samples);
     $samples = explode(".",$samples);
     $lab = "";
 
@@ -20,9 +21,16 @@ class riders extends eidsr_base {
       $test_lab = explode("-",$lab);
       $lab = "";
       reset($samples);
-      if(count($test_lab) == 1)
-      $lab = end($samples);
+      if(count($test_lab) == 1) {
+        $lab = end($samples);
+        unset($samples[count($samples)-1]);
+      }
       reset($samples);
+    }
+
+    if(count($samples) == 0){
+      echo '{"status":"incomplete"}';
+      return false;
     }
 
     if($action == "sample_delivered") {
@@ -33,8 +41,10 @@ class riders extends eidsr_base {
     }
 
     foreach($samples as $sample) {
+      $sample_found = false;
       foreach ($reported_cases as $case) {
         if(in_array($sample,$case)) {
+          $sample_found = true;
           $cont_alert = array();
           $facility_code = $case["facility_code"];
           $disease_name = $case ["disease_name"];
@@ -77,6 +87,20 @@ class riders extends eidsr_base {
           break;
         }
       }
+      if(!$sample_found) {
+        if(!$missing)
+        $missing = $sample;
+        else
+        $missing .= ",".$sample;
+      }
+    }
+    if($missing) {
+      echo '{ "status":"not_found","samples":"'.$missing.'"}';
+      return false;
+    }
+    else {
+      echo '{"status":"success"}';
+      return true;
     }
   }
 
