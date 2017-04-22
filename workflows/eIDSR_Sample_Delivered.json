@@ -1,0 +1,187 @@
+{
+  "campaigns": [], 
+  "version": 10, 
+  "site": "https://app.rapidpro.io", 
+  "flows": [
+    {
+      "base_language": "eng", 
+      "action_sets": [
+        {
+          "y": 145, 
+          "x": 607, 
+          "destination": "43511958-ea42-4537-b22c-f750a707f264", 
+          "uuid": "a5cdb113-9b6c-440b-8ed4-208996457e7f", 
+          "actions": [
+            {
+              "action": "POST", 
+              "type": "api", 
+              "webhook": "http://52.18.125.4:8081/eidsr/riders.php?category=sample_delivered&samples=@flow.samples.text"
+            }
+          ]
+        }, 
+        {
+          "y": 565, 
+          "x": 658, 
+          "destination": null, 
+          "uuid": "e30ba55f-8d8c-45cd-b54f-2e98621f341e", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Your message was not processed,please send message in the format\ndelivered.sample-id1.sample-id2.lab name\nwhere sample-id1,2 are the IDs of samples delivered"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 443, 
+          "x": 301, 
+          "destination": null, 
+          "uuid": "67b668e3-f853-44e0-8a1a-0f119f3b8315", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Thank you for delivering samples to the Lab. DSO,CSO,facility and others were informed"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 422, 
+          "x": 1034, 
+          "destination": null, 
+          "uuid": "8a629165-4d8f-44ab-b528-13b13ae6f1db", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Samples with ID @extra.samples were not found on the system,please check and resend."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }
+      ], 
+      "version": 10, 
+      "flow_type": "F", 
+      "entry": "e9698992-4a83-433a-9afb-1f283a077d24", 
+      "rule_sets": [
+        {
+          "uuid": "e9698992-4a83-433a-9afb-1f283a077d24", 
+          "rules": [
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "All Responses"
+              }, 
+              "destination": "a5cdb113-9b6c-440b-8ed4-208996457e7f", 
+              "uuid": "d254a4da-a02c-46f9-9274-ea9ac645b85c", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "wait_message", 
+          "label": "samples", 
+          "operand": "@step.value", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 0, 
+          "x": 524, 
+          "config": {}
+        }, 
+        {
+          "uuid": "43511958-ea42-4537-b22c-f750a707f264", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "success"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Success"
+              }, 
+              "destination": "67b668e3-f853-44e0-8a1a-0f119f3b8315", 
+              "uuid": "73373b0e-1f58-495a-99ee-043158f86f11", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "incomplete"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Incomplete"
+              }, 
+              "destination": "e30ba55f-8d8c-45cd-b54f-2e98621f341e", 
+              "uuid": "2cafd03a-28ce-405d-91e5-619182b82e00", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "not_found"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Not_found"
+              }, 
+              "destination": "8a629165-4d8f-44ab-b528-13b13ae6f1db", 
+              "uuid": "9457fae7-df77-49e2-a95e-956cff97ffdf", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "uuid": "e6069a9a-2ade-42e2-af3b-ebbffa335e71"
+            }
+          ], 
+          "ruleset_type": "expression", 
+          "label": "response", 
+          "operand": "@extra.status", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 337, 
+          "x": 625, 
+          "config": {}
+        }
+      ], 
+      "metadata": {
+        "expires": 10080, 
+        "saved_on": "2017-04-22T11:44:23.140303Z", 
+        "uuid": "32041105-36cb-4940-9a63-c6880976d274", 
+        "name": "mHero eIDSR Sample Delivered", 
+        "revision": 22
+      }
+    }
+  ], 
+  "triggers": [
+    {
+      "trigger_type": "K", 
+      "flow": {
+        "name": "mHero eIDSR Sample Delivered", 
+        "uuid": "32041105-36cb-4940-9a63-c6880976d274"
+      }, 
+      "groups": [], 
+      "keyword": "delivered", 
+      "channel": null
+    }
+  ]
+}

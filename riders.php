@@ -42,6 +42,7 @@ class riders extends eidsr_base {
 
     foreach($samples as $sample) {
       $sample_found = false;
+      $sample = trim($sample);
       foreach ($reported_cases as $case) {
         if(in_array($sample,$case)) {
           $sample_found = true;
@@ -107,6 +108,8 @@ class riders extends eidsr_base {
 }
 
 require("config.php");
+$category = $_REQUEST["category"];
+$samples = $_REQUEST["samples"];
 require("test_config.php");
 $obj = new riders($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,
                   $csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$samples
