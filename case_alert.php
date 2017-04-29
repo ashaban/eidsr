@@ -2,10 +2,15 @@
 require("eidsr_base.php");
 
 class eidsr extends eidsr_base{
-  function __construct( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
-                        $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease
-                       ) {
-    parent::__construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd);
+  function __construct(
+                        $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,
+                        $mhero_eidsr_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,
+                        $eidsr_passwd,$reported_disease
+                      ) {
+    parent::__construct(
+                        $rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,
+                        $eidsr_user,$eidsr_passwd,$mhero_eidsr_flow_uuid
+                       );
     $this->reporter_phone = $reporter_phone;
     $this->reporter_name = $reporter_name;
     $this->report = $report;
@@ -14,6 +19,7 @@ class eidsr extends eidsr_base{
     $this->reporter_globalid = $reporter_globalid;
     $this->rapidpro_token = $rapidpro_token;
     $this->rapidpro_host = $rapidpro_url;
+    $this->mhero_eidsr_flow_uuid = $mhero_eidsr_flow_uuid;
     $this->csd_host = $csd_host;
     $this->csd_user = $csd_user;
     $this->csd_passwd = $csd_passwd;
@@ -56,19 +62,19 @@ class eidsr extends eidsr_base{
   public function validate_report() {
     $report = explode(".",$this->report);
     array_walk($report,'eidsr::trim_values');
-    $possible_specimen = array("yes","no");
+    $possible_specimen = array("yes"=>"Yes","ye"=>"Yes","y"=>"Yes","no"=>"No","n"=>"No");
     $this->specimen = "";
     if(count($report)>1 and is_numeric($report[1])) {
       $this->caseid = $report[1];
     }
-    else if (!$this->caseid and count($report)>1 and in_array(strtolower($report[1]),$possible_specimen)) {
-      $this->specimen = $report[1];
+    else if (!$this->caseid and count($report)>1 and array_key_exists(strtolower($report[1]),$possible_specimen)) {
+      $this->specimen = ucfirst($possible_specimen[$report[1]]);
     }
     if(!$this->caseid and count($report)>2 and is_numeric($report[2])) {
       $this->caseid = $report[2];
     }
-    else if(!$this->specimen and count($report)>2 and in_array(strtolower($report[2]),$possible_specimen)) {
-      $this->specimen = $report[2];
+    else if(!$this->specimen and count($report)>2 and array_key_exists(strtolower($report[2]),$possible_specimen)) {
+      $this->specimen = ucfirst($possible_specimen[$report[2]]);
     }
   }
 
@@ -107,28 +113,7 @@ class eidsr extends eidsr_base{
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]." Facility. Sample is available at this facility for you to pick";
       $this->broadcast($riders_contacts,$msg);
     }
-
-    //send data to offline tracker
-    $this->send_to_syncserver();
-  }
-
-  public function start_flow($flow_uuid,$group_uuid,$contacts_uuid = array(),$extra) {
-    $url = $this->rapidpro_host."api/v2/flow_starts.json";
-    $header = Array(
-                       "Content-Type: application/json",
-                       "Authorization: Token $this->rapidpro_token",
-                    );
-
-    if(count($contacts_uuid)>0) {
-      foreach ($contacts_uuid as $cont_uuid) {
-        $post_data = '{ "flow":"'.$flow_uuid.'",
-                        "contacts":["'.$cont_uuid.'"],
-                        "extra": {'.$extra.'}
-                      }';
-        error_log($post_data);
-        $this->exec_request($url,"","","POST",$post_data,$header);
-      }
-    }
+    return;
   }
 
   public function send_to_syncserver() {
@@ -163,8 +148,7 @@ class eidsr extends eidsr_base{
       if(substr($resp,0,8) == "Location") {
         $trackerid = str_ireplace ("Location: /casealert/","",$resp);
         error_log('{"trackerid":"'.$trackerid.'"}');
-        echo '{"trackerid":"'.$trackerid.'"}';
-        return;
+        return $trackerid;
       }
     }
   }
@@ -203,14 +187,18 @@ $reporter_globalid = $_REQUEST["reporter_globalid"];
 
 require("test_config.php");
 $report = str_ireplace("alert.","",$report);
-$eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,$csd_host,$csd_user,
-                    $csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease
+$eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
+                    $rapidpro_url,$mhero_eidsr_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,
+                    $eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease
                   );
 
 if($category == "alert_all") {
   $eidsr->notify_group = array("DPC Group");
   $eidsr->validate_report();
   $eidsr->alert_all();
+  $trackerid = $eidsr->send_to_syncserver();
+  $extra = '"trackerid":"'.$trackerid.'","disease":"'.$reported_disease.'","specimenCollected":"'.$eidsr->specimen.'"';
+  $eidsr->start_flow($eidsr->mhero_eidsr_flow_uuid,"",array($reporter_rp_id),$extra);
 }
 if($category == "update") {
   $eidsr->community_detection = $_REQUEST["community_detection"];

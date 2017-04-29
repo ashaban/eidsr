@@ -1,6 +1,6 @@
 <?php
 class eidsr_base {
-  function __construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd) {
+  function __construct($rapidpro_token,$rapidpro_url,$mhero_eidsr_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd) {
     $this->rapidpro_token = $rapidpro_token;
     $this->rapidpro_host = $rapidpro_url;
     $this->csd_host = $csd_host;
@@ -249,6 +249,25 @@ class eidsr_base {
         error_log($post_data);
       //$this->exec_request($url,"","","POST",$post_data,$header);
       }
+  }
+
+  public function start_flow($flow_uuid,$group_uuid,$contacts_uuid = array(),$extra) {
+    $url = $this->rapidpro_host."api/v2/flow_starts.json";
+    $header = Array(
+                       "Content-Type: application/json",
+                       "Authorization: Token $this->rapidpro_token",
+                    );
+
+    if(count($contacts_uuid)>0) {
+      foreach ($contacts_uuid as $cont_uuid) {
+        $post_data = '{ "flow":"'.$flow_uuid.'",
+                        "contacts":["'.$cont_uuid.'"],
+                        "extra": {'.$extra.'}
+                      }';
+        error_log($post_data);
+        $this->exec_request($url,"","","POST",$post_data,$header);
+      }
+    }
   }
 
   public function exec_request($url,$user,$password,$req_type,$post_data,$header = Array("Content-Type: text/xml"),$get_header=false) {

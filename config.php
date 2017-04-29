@@ -1,5 +1,6 @@
 <?php
 $rapidpro_token = "";
+$mhero_eidsr_flow_uuid = "a3ad7cf4-f07e-46bf-925e-e0d9441ad4ee";
 $rapidpro_url = "https://app.rapidpro.io/";
 $csd_host = "http://localhost:8984/CSD/";
 $csd_user = "csd";
