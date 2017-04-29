@@ -68,13 +68,15 @@ class eidsr extends eidsr_base{
       $this->caseid = $report[1];
     }
     else if (!$this->caseid and count($report)>1 and array_key_exists(strtolower($report[1]),$possible_specimen)) {
-      $this->specimen = ucfirst($possible_specimen[$report[1]]);
+      $specimen = strtolower($report[1]);
+      $this->specimen = ucfirst($possible_specimen[$specimen]);
     }
     if(!$this->caseid and count($report)>2 and is_numeric($report[2])) {
       $this->caseid = $report[2];
     }
     else if(!$this->specimen and count($report)>2 and array_key_exists(strtolower($report[2]),$possible_specimen)) {
-      $this->specimen = ucfirst($possible_specimen[$report[2]]);
+      $specimen = strtolower($report[2]);
+      $this->specimen = ucfirst($possible_specimen[$specimen]);
     }
   }
 
