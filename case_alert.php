@@ -1,4 +1,8 @@
 <?php
+/*
+TO DO
+1.Dont allow someone with no facility to do anything/discuss with Stephen the approach to handle people with no facilities
+*/
 require("eidsr_base.php");
 
 class eidsr extends eidsr_base{
@@ -80,7 +84,7 @@ class eidsr extends eidsr_base{
     }
   }
 
-  public function alert_all (){
+  public function alert_all ($idsrid){
     $cont_alert = array();
     foreach($this->notify_group as $group_name) {
       $other_contacts = $this->get_contacts_in_grp(urlencode($group_name));
@@ -88,32 +92,50 @@ class eidsr extends eidsr_base{
       $cont_alert = array_merge($cont_alert,$other_contacts);
     }
     //alert all partners
-    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.".";
-    if($this->specimen)
-    $msg .= "A sample was also taken for Riders to pick";
-    $this->broadcast($cont_alert,$msg);
+    if(count($cont_alert) > 0) {
+      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.".";
+      if($this->specimen)
+      $msg .= "A sample was also taken for Riders to pick";
+      $this->broadcast($cont_alert,$msg);
+    }
 
     //alert CSO
     $cso = $this->get_cso($this->facility_details["county_uuid"]);
     $cont_alert = $this->get_rapidpro_id($cso);
-    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.". Please verify with DSO";
-    if($this->specimen)
-    $msg .= ".A sample was also taken for Riders to pick";
-    $this->broadcast($cont_alert,$msg);
+    if(count($cont_alert) > 0) {
+      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.". Please verify with DSO";
+      if($this->specimen)
+      $msg .= ".A sample was also taken for Riders to pick";
+      $this->broadcast($cont_alert,$msg);
+    }
 
     //alert DSO
     $dso = $this->get_dso($this->facility_details["district_uuid"]);
     $cont_alert = $this->get_rapidpro_id($dso);
-    $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name."(".$this->reporter_phone."). Please call or visit health facility to verify";
-    if($this->specimen)
-    $msg .= ".A sample was also taken for Riders to pick";
-    $this->broadcast($cont_alert,$msg);
+    if(count($cont_alert) > 0) {
+      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") With IDSRID ".$idsrid." By ".$this->reporter_name."(".$this->reporter_phone."). Please call or visit health facility to verify";
+      if($this->specimen)
+      $msg .= ".A sample was also taken for Riders to pick";
+      $this->broadcast($cont_alert,$msg);
+    }
+
+    //alert CDO
+    $cdo = $this->get_cdo($this->facility_details["county_uuid"]);
+    $cont_alert = $this->get_rapidpro_id($cdo);
+    if(count($cont_alert) > 0) {
+      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].")";
+      if($this->specimen)
+      $msg .= ".A sample was also taken for Riders to pick";
+      $this->broadcast($cont_alert,$msg);
+    }
 
     //if sample collected then alert Riders dispatch
     if($this->specimen) {
       $riders_contacts = $this->get_contacts_in_grp(urlencode("Riders Dispatch"));
-      $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"]."). Sample is available at this facility for you to pick";
-      $this->broadcast($riders_contacts,$msg);
+      if(count($riders_contacts) > 0) {
+        $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") With IDSRID ".$idsrid.". Sample is available at this facility for you to pick";
+        $this->broadcast($riders_contacts,$msg);
+      }
     }
     return;
   }
@@ -123,7 +145,6 @@ class eidsr extends eidsr_base{
     $header = Array(
                     "Content-Type: application/json"
                    );
-    $idsrid = $this->facility_details["county_code"]."-".$this->facility_details["facility_code"]."-".$this->caseid;
     $post_data = '{
                     "reportingPersonName":"'.$this->reporter_name.'",
                     "reportingPersonPhoneNumber":"'.$this->reporter_phone.'",
@@ -134,6 +155,14 @@ class eidsr extends eidsr_base{
                   }';
     error_log($post_data);
     $response = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header,true);
+    list($header, $body) = explode("\r\n\r\n", $response, 2);
+    if(count($header) == 0)
+    error_log("Something went wrong,sync server returned no header");
+    if(count($body) == 0)
+    error_log("Something went wrong,sync server returned no body");
+    $body = json_decode($body,true);
+    $idsrid = $body["caseInfo"]["idsrId"];
+
 
     $reported_cases = file_get_contents("reported_cases.json");
     $reported_cases = json_decode($reported_cases,true);
@@ -145,14 +174,16 @@ class eidsr extends eidsr_base{
                                          );
     $reported_cases = json_encode($reported_cases,true);
     file_put_contents("reported_cases.json",$reported_cases);
-    $response = explode("\r\n",$response);
-    foreach($response as $resp) {
+    $header = explode("\r\n",$header);
+    foreach($header as $resp) {
       if(substr($resp,0,8) == "Location") {
         $trackerid = str_ireplace ("Location: /casealert/","",$resp);
-        error_log('{"trackerid":"'.$trackerid.'"}');
-        return $trackerid;
+        break;
       }
     }
+    $sync_server_results = array("trackerid"=>$trackerid,"idsrid"=>$idsrid);
+    error_log(print_r($sync_server_results,true));
+    return $sync_server_results;
   }
 
   public function update_syncserver() {
@@ -179,6 +210,7 @@ class eidsr extends eidsr_base{
 
 
 require("config.php");
+$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.767676.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:2d2259d9-c52f-3430-bbef-d08992444058');
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
@@ -195,11 +227,13 @@ $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$repo
                   );
 
 if($category == "alert_all") {
-  $eidsr->notify_group = array("DPC Group");
+  $eidsr->notify_group = array("DPC Group","National Reference Lab","County Diagnostic Officer");
   $eidsr->validate_report();
-  $eidsr->alert_all();
-  $trackerid = $eidsr->send_to_syncserver();
-  $extra = '"trackerid":"'.$trackerid.'","disease":"'.$reported_disease.'","specimenCollected":"'.$eidsr->specimen.'"';
+  $sync_server_results = $eidsr->send_to_syncserver();
+  $idsrid = $sync_server_results["idsrid"];
+  $trackerid = $sync_server_results["trackerid"];
+  $eidsr->alert_all($idsrid);
+  $extra = '"trackerid":"'.$trackerid.'","idsrid":"'.$idsrid.'","disease":"'.$reported_disease.'","specimenCollected":"'.$eidsr->specimen.'"';
   $eidsr->start_flow($eidsr->mhero_eidsr_flow_uuid,"",array($reporter_rp_id),$extra);
 }
 if($category == "update") {

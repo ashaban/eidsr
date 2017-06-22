@@ -74,6 +74,9 @@ class eidsr_base {
 
   public function get_rapidpro_id ($provs_uuid = array()) {
     $ids = "";
+    if(count($provs_uuid) == 0)
+    return array();
+
     foreach ($provs_uuid as $prov) {
         $ids .= "<csd:id entityID='" . $prov . "'/>\n" ;
       }
@@ -112,21 +115,49 @@ class eidsr_base {
     return $rp_ids;
   }
 
+  public function get_county_districts($county_uuid) {
+    //get districts under $this->county_uuid
+    if(!$county_uuid) {
+      error_log("County UUID Missing,CSO wont be alerted");
+      return array();
+    }
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+           <csd:parent entityID="'.$county_uuid.'"/>
+          </csd:requestParams>';
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:organization-search";
+    $orgs_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $orgs_uuids = $this->extract($orgs_entity,"/csd:organization/@entityID",'organizationDirectory',true);
+    $distr_uuids = explode(";", $orgs_uuids);
+    return $distr_uuids;
+  }
+
+  public function get_district_facilities($district_uuid) {
+    if(!$district_uuid) {
+      error_log("District UUID Missing,DSO wont be alerted");
+      return array();
+    }
+    //get facilities under this county
+    $fac_uuids = array();
+    global $fac_uuids;
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+            <csd:organizations>
+              <csd:organization  entityID="'.$district_uuid.'"/>
+            </csd:organizations>
+          </csd:requestParams>';
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:facility-search";
+    $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $fac = $this->extract($fac_entity,"/csd:facility/@entityID",'facilityDirectory',true);
+    $fac_uuids = explode(";", $fac);
+    return $fac_uuids;
+  }
+
   public function get_dso($district_uuid) {
     if(!$district_uuid) {
       error_log("District UUID Missing,DSO wont be alerted");
       return array();
     }
     //get facilities under $district_uuid
-    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-           <csd:organizations>
-            <csd:organization  entityID="'.$district_uuid.'"/>
-           </csd:organizations>
-          </csd:requestParams>';
-    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:facility-search";
-    $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    $fac_uuids1 = $this->extract($fac_entity,"/csd:facility/@entityID",'facilityDirectory',true);
-    $fac_uuids = explode(";", $fac_uuids1);
+    $fac_uuids = $this->get_district_facilities($district_uuid);
     //foreach facility,fetch providers and check if is DSO
     $dso = array();
     foreach ($fac_uuids as $fac_uuid) {
@@ -140,7 +171,7 @@ class eidsr_base {
       $prov_entity = new SimpleXMLElement($prov_entity);
       foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
         global $dso;
-        if($prov->extension->position == "District Surveillance Officer" or $prov->extension->position == "Surveillance Officer" or $prov->extension->position == "DSO"){
+        if($prov->extension->position->attributes()->title == "District Surveillance Officer" or $prov->extension->position->attributes()->title == "DSO"){
           $curr_dso = $dso;
           if(count($curr_dso)==0)
             $curr_dso = array();
@@ -149,34 +180,15 @@ class eidsr_base {
         }
       }
     }
+    error_log("DSO===>" . print_r($dso,true));
     return $dso;
   }
 
   public function get_cso($county_uuid) {
-    //get districts under $this->county_uuid
-    if(!$county_uuid) {
-      error_log("County UUID Missing,CSO wont be alerted");
-      return array();
-    }
-    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-           <csd:parent entityID="'.$county_uuid.'"/>
-          </csd:requestParams>';
-    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:organization-search";
-    $orgs_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    $orgs_uuids = $this->extract($orgs_entity,"/csd:organization/@entityID",'organizationDirectory',true);
-    $distr_uuids = explode(";", $orgs_uuids);
+    $distr_uuids = $this->get_county_districts($county_uuid);
     $fac_uuids = array();
     foreach ($distr_uuids as $distr_uuid) {
-      global $fac_uuids;
-      $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-              <csd:organizations>
-                <csd:organization  entityID="'.$distr_uuid.'"/>
-              </csd:organizations>
-            </csd:requestParams>';
-      $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:facility-search";
-      $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-      $fac = $this->extract($fac_entity,"/csd:facility/@entityID",'facilityDirectory',true);
-      $fac = explode(";", $fac);
+      $fac = $this->get_district_facilities($distr_uuid);
       $curr_fac = $fac_uuids;
       if(count($curr_fac)==0)
         $curr_fac = array();
@@ -196,7 +208,7 @@ class eidsr_base {
       $prov_entity = new SimpleXMLElement($prov_entity);
       foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
         global $cso;
-        if($prov->extension->position == "Council Surveillance Officer" or $prov->extension->position == "Surveillance Officer" or $prov->extension->position == "CSO"){
+        if($prov->extension->position->attributes()->title == "County Surveillance Officer" or $prov->extension->position->attributes()->title == "CSO"){
           $curr_cso = $cso;
           if(count($curr_cso)==0)
             $curr_cso = array();
@@ -205,7 +217,45 @@ class eidsr_base {
         }
       }
     }
+    error_log("CSO===>" . print_r($cso,true));
     return $cso;
+  }
+
+  public function get_cdo($county_uuid) {
+    $distr_uuids = $this->get_county_districts($county_uuid);
+    $fac_uuids = array();
+    foreach ($distr_uuids as $distr_uuid) {
+      $fac = $this->get_district_facilities($distr_uuid);
+      $curr_fac = $fac_uuids;
+      if(count($curr_fac)==0)
+        $curr_fac = array();
+      $fac_uuids = array_merge($curr_fac,$fac);
+    }
+
+    //foreach facility,fetch providers and check if is DSO
+    $cdo = array();
+    foreach ($fac_uuids as $fac_uuid) {
+      $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+           <csd:facilities>
+            <csd:facility  entityID="'.$fac_uuid.'"/>
+           </csd:facilities>
+          </csd:requestParams>';
+      $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
+      $prov_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+      $prov_entity = new SimpleXMLElement($prov_entity);
+      foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
+        global $cdo;
+        if($prov->extension->position->attributes()->title == "County Diagnostic Officer" or              $prov->extension->position->attributes()->title == "CDO"){
+          $curr_cdo = $cdo;
+          if(count($curr_cdo)==0)
+            $curr_cdo = array();
+          $cdo1 = array((string)$prov->attributes()->entityID);
+          $cdo = array_merge($curr_cdo,$cdo1);
+        }
+      }
+    }
+    error_log("CDO===>" . print_r($cdo,true));
+    return $cdo;
   }
 
   public function get_group_uuid ($group_name) {
@@ -223,6 +273,8 @@ class eidsr_base {
 
   public function get_contacts_in_grp ($group_name) {
     $group_uuid = $this->get_group_uuid ($group_name);
+    if($group_uuid == "")
+    return array();
     $url = $this->rapidpro_host."api/v2/contacts.json?group=$group_uuid";
     $header = Array(
                          "Content-Type: application/json",
@@ -247,7 +299,7 @@ class eidsr_base {
       foreach($contacts_uuid as $uuid) {
         $post_data = '{ "contacts": ["'.$uuid.'"], "text": "'.$msg.'" }';
         error_log($post_data);
-      //$this->exec_request($url,"","","POST",$post_data,$header);
+        //$this->exec_request($url,"","","POST",$post_data,$header);
       }
   }
 
