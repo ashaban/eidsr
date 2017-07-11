@@ -227,7 +227,7 @@ $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$repo
                   );
 
 if($category == "alert_all") {
-  $eidsr->notify_group = array("DPC Group","National Reference Lab","County Diagnostic Officer");
+  $eidsr->notify_group = array("DPC Group","National Reference Lab");
   $eidsr->validate_report();
   $sync_server_results = $eidsr->send_to_syncserver();
   $idsrid = $sync_server_results["idsrid"];
