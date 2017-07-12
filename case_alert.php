@@ -68,6 +68,7 @@ class eidsr extends eidsr_base{
     array_walk($report,'eidsr::trim_values');
     $possible_specimen = array("yes"=>"Yes","ye"=>"Yes","y"=>"Yes","no"=>"No","n"=>"No");
     $this->specimen = "";
+    $this->caseid = false;
     if(count($report)>1 and is_numeric($report[1])) {
       $this->caseid = $report[1];
     }
@@ -82,6 +83,10 @@ class eidsr extends eidsr_base{
       $specimen = strtolower($report[2]);
       $this->specimen = ucfirst($possible_specimen[$specimen]);
     }
+    if($this->caseid === false)
+    return false;
+    else
+    return true;
   }
 
   public function alert_all ($idsrid){
@@ -210,7 +215,7 @@ class eidsr extends eidsr_base{
 
 
 require("config.php");
-$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.767676.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:2d2259d9-c52f-3430-bbef-d08992444058');
+$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77878.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:2d2259d9-c52f-3430-bbef-d08992444058');
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
@@ -226,15 +231,27 @@ $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$repo
                     $eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease
                   );
 
+//if no facility for the reporter then
+if($eidsr->facility_details["facility_uuid"] == "") {
+  $eidsr->broadcast(array($reporter_rp_id),"You are not allowed to access EIDSR system");
+  return;
+}
+
 if($category == "alert_all") {
   $eidsr->notify_group = array("DPC Group","National Reference Lab");
-  $eidsr->validate_report();
-  $sync_server_results = $eidsr->send_to_syncserver();
-  $idsrid = $sync_server_results["idsrid"];
-  $trackerid = $sync_server_results["trackerid"];
-  $eidsr->alert_all($idsrid);
-  $extra = '"trackerid":"'.$trackerid.'","idsrid":"'.$idsrid.'","disease":"'.$reported_disease.'","specimenCollected":"'.$eidsr->specimen.'"';
-  $eidsr->start_flow($eidsr->mhero_eidsr_flow_uuid,"",array($reporter_rp_id),$extra);
+  $valid = $eidsr->validate_report();
+  if($valid) {
+    $sync_server_results = $eidsr->send_to_syncserver();
+    $idsrid = $sync_server_results["idsrid"];
+    $trackerid = $sync_server_results["trackerid"];
+    $eidsr->alert_all($idsrid);
+    $extra = '"trackerid":"'.$trackerid.'","idsrid":"'.$idsrid.'","disease":"'.$reported_disease.'","specimenCollected":"'.$eidsr->specimen.'"';
+    $eidsr->start_flow($eidsr->mhero_eidsr_flow_uuid,"",array($reporter_rp_id),$extra);
+  }
+  else {
+    $eidsr->broadcast(array($reporter_rp_id),"Case Id for this case report is missing,please resubmit the case with case ID");
+    return;
+  }
 }
 if($category == "update") {
   $eidsr->community_detection = $_REQUEST["community_detection"];
