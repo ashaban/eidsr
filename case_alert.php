@@ -257,7 +257,7 @@ if($category == "alert_all") {
     $idsrid = $sync_server_results["idsrid"];
     $trackerid = $sync_server_results["trackerid"];
     $eidsr->alert_all($idsrid);
-    $extra = '"trackerid":"'.$trackerid.'","idsrid":"'.$idsrid.'","disease":"'.$reported_disease.'","specimenCollected":"'.$eidsr->specimen.'"';
+    $extra = '"trackerid":"'.$trackerid.'","idsrid":"'.$idsrid.'","disease_name":"'.$reported_disease.'","specimenCollected":"'.$eidsr->specimen.'"';
     $eidsr->start_flow($eidsr->mhero_eidsr_flow_uuid,"",array($reporter_rp_id),$extra);
   }
   else {
