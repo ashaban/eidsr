@@ -1,8 +1,4 @@
 <?php
-/*
-TO DO
-1.Dont allow someone with no facility to do anything/discuss with Stephen the approach to handle people with no facilities
-*/
 require("eidsr_base.php");
 
 class eidsr extends eidsr_base{
@@ -13,7 +9,7 @@ class eidsr extends eidsr_base{
                       ) {
     parent::__construct(
                         $rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,
-                        $eidsr_user,$eidsr_passwd,$mhero_eidsr_flow_uuid
+                        $eidsr_user,$eidsr_passwd
                        );
     $this->reporter_phone = $reporter_phone;
     $this->reporter_name = $reporter_name;
@@ -214,8 +210,24 @@ class eidsr extends eidsr_base{
 }
 
 
+/*This code sends a response to rapidpro and continue execution of the rest
+This is important because rapidpro webhook calling has a wait time limit,if exceeded then it will show the webhook calling has failed
+*/
+ob_start();
+echo '{"status":"processing"}';
+$size = ob_get_length();
+header("Content-Encoding: none");
+header("Content-Length: {$size}");
+header("Connection: close");
+ob_end_flush();
+ob_flush();
+flush();
+if(session_id())
+session_write_close();
+//end of closing the connection,now start processing the request and start a separate flow
+
 require("config.php");
-$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77878.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:2d2259d9-c52f-3430-bbef-d08992444058');
+//$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77878.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:2d2259d9-c52f-3430-bbef-d08992444058');
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];

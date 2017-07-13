@@ -2,10 +2,11 @@
 require("eidsr_base.php");
 
 class riders extends eidsr_base {
-  function __construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$samples) {
+  function __construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$samples,$reporter_rp_id) {
     parent::__construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd);
     $this->samples = $samples;
-    $this->notify_group = array("DPC Group");
+    $this->reporter_rp_id = $reporter_rp_id;
+    $this->notify_group = array("DPC Group","National Reference Lab");
   }
 
   public function sample_action($action) {
@@ -29,7 +30,8 @@ class riders extends eidsr_base {
     }
 
     if(count($samples) == 0){
-      echo '{"status":"incomplete"}';
+      $extra = '"status":"incomplete"';
+      $this->start_flow($this->flow_uuid,"",array($this->reporter_rp_id),$extra);
       return false;
     }
 
@@ -96,27 +98,50 @@ class riders extends eidsr_base {
       }
     }
     if($missing) {
-      echo '{ "status":"not_found","samples":"'.$missing.'"}';
+      $extra = '"status":"not_found","samples":"'.$missing.'"';
+      $this->start_flow($this->flow_uuid,"",array($this->reporter_rp_id),$extra);
       return false;
     }
     else {
-      echo '{"status":"success"}';
+      $extra = '"status":"success"';
+      $this->start_flow($this->flow_uuid,"",array($this->reporter_rp_id),$extra);
       return true;
     }
   }
 
 }
 
+/*This code sends a response to rapidpro and continue execution of the rest
+This is important because rapidpro webhook calling has a wait time limit,if exceeded then it will show the webhook calling has failed
+*/
+ob_start();
+echo '{"status":"processing"}';
+$size = ob_get_length();
+header("Content-Encoding: none");
+header("Content-Length: {$size}");
+header("Connection: close");
+ob_end_flush();
+ob_flush();
+flush();
+if(session_id())
+session_write_close();
+//end of closing the connection,now start processing the request and start a separate flow
 require("config.php");
 $category = $_REQUEST["category"];
 $samples = $_REQUEST["samples"];
+$reporter_rp_id = $_REQUEST["reporter_rp_id"];
 require("test_config.php");
 $obj = new riders($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,
-                  $csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$samples
+                  $csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$samples,
+                  $reporter_rp_id,$category
                  );
-$category = "sample_delivered";
-if($category == "sample_picked")
-$obj->sample_action("sample_picked");
-else if($category == "sample_delivered")
-$obj->sample_action("sample_delivered");
+
+if($category == "sample_picked") {
+  $obj->flow_uuid = "48291e6b-e8f9-48d4-8e82-71b76c8d0a8d";
+  $obj->sample_action("sample_picked");
+  }
+else if($category == "sample_delivered") {
+  $obj->flow_uuid = "81a2f0ed-2451-4db0-8a92-7716ead14e16";
+  $obj->sample_action("sample_delivered");
+  }
 ?>

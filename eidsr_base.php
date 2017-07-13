@@ -1,6 +1,6 @@
 <?php
 class eidsr_base {
-  function __construct($rapidpro_token,$rapidpro_url,$mhero_eidsr_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd) {
+  function __construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd) {
     $this->rapidpro_token = $rapidpro_token;
     $this->rapidpro_host = $rapidpro_url;
     $this->csd_host = $csd_host;
@@ -299,7 +299,7 @@ class eidsr_base {
       foreach($contacts_uuid as $uuid) {
         $post_data = '{ "contacts": ["'.$uuid.'"], "text": "'.$msg.'" }';
         error_log($post_data);
-        //$this->exec_request($url,"","","POST",$post_data,$header);
+        $this->exec_request($url,"","","POST",$post_data,$header);
       }
   }
 
