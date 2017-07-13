@@ -43,6 +43,8 @@ class riders extends eidsr_base {
     }
 
     foreach($samples as $sample) {
+      if($sample == "")
+      continue;
       $sample_found = false;
       $sample = trim($sample);
       foreach ($reported_cases as $case) {
@@ -114,6 +116,7 @@ class riders extends eidsr_base {
 /*This code sends a response to rapidpro and continue execution of the rest
 This is important because rapidpro webhook calling has a wait time limit,if exceeded then it will show the webhook calling has failed
 */
+$_REQUEST = array("category" => "sample_picked","samples"=>"Picked.grc-21m4-006","reporter_phone" => "088 684 7915","reporter_name" => "Stephen Mambu Gbanyan","reporter_rp_id" => "3124c792-c322-4aed-8206-b7bcedddd46f","reporter_globalid" =>"urn:uuid:a5547568-a24c-39b7-b895-734ed8a777f2");
 ob_start();
 echo '{"status":"processing"}';
 $size = ob_get_length();
@@ -137,7 +140,7 @@ $obj = new riders($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,
                  );
 
 if($category == "sample_picked") {
-  $obj->flow_uuid = "48291e6b-e8f9-48d4-8e82-71b76c8d0a8d";
+  $obj->flow_uuid = "90b9c70e-1b2f-4815-a704-14e01c307655";
   $obj->sample_action("sample_picked");
   }
 else if($category == "sample_delivered") {

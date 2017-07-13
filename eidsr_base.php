@@ -299,7 +299,7 @@ class eidsr_base {
       foreach($contacts_uuid as $uuid) {
         $post_data = '{ "contacts": ["'.$uuid.'"], "text": "'.$msg.'" }';
         error_log($post_data);
-        $this->exec_request($url,"","","POST",$post_data,$header);
+        //$this->exec_request($url,"","","POST",$post_data,$header);
       }
   }
 
