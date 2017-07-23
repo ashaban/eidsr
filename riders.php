@@ -46,7 +46,7 @@ class riders extends eidsr_base {
       if($sample == "")
       continue;
       $sample_found = false;
-      $sample = trim($sample);
+      $sample = strtoupper(trim($sample));
       foreach ($reported_cases as $case) {
         if(in_array($sample,$case)) {
           $sample_found = true;
@@ -78,15 +78,13 @@ class riders extends eidsr_base {
           }
           if(count($cont_alert) > 0)
           $this->broadcast($cont_alert,$msg);
-
           //if delivered,alert HW
           if($action == "sample_delivered") {
             $cont_alert = $this->get_rapidpro_id(array($case["reporter_globalid"]));
             $msg = "Rider has ".$status." a sample of a Suspected case of ".$disease_name;
             if($lab)
             $msg .= " To ".$lab." Lab,";
-            $msg .= " Which was Reported From your facility (".$facility_details["facility_name"].",".$facility_details["district_name"].")
-            ";
+            $msg .= " Which was Reported From your facility (".$facility_details["facility_name"].",".$facility_details["district_name"].")";
             $this->broadcast($cont_alert,$msg);
           }
           break;

@@ -162,7 +162,7 @@ class eidsr extends eidsr_base{
     if(count($body) == 0)
     error_log("Something went wrong,sync server returned no body");
     $body = json_decode($body,true);
-    $idsrid = $body["caseInfo"]["idsrId"];
+    $idsrid = strtoupper($body["caseInfo"]["idsrId"]);
 
 
     $reported_cases = file_get_contents("reported_cases.json");
@@ -227,7 +227,7 @@ session_write_close();
 //end of closing the connection,now start processing the request and start a separate flow
 
 require("config.php");
-//$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77878.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:2d2259d9-c52f-3430-bbef-d08992444058');
+//$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77878.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'3124c792-c322-4aed-8206-b7bcedddd46f','reporter_globalid'=>'urn:uuid:a5547568-a24c-39b7-b895-734ed8a777f2');
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
