@@ -171,14 +171,16 @@ class eidsr_base {
       $prov_entity = new SimpleXMLElement($prov_entity);
       foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
         global $dso;
-        if( $prov->extension->position->attributes()->title == "District Surveillance Officer" or
-            strpos($prov->extension->position->attributes()->title,"District Surveillance") !== false or
-            $prov->extension->position->attributes()->title == "DSO"){
-          $curr_dso = $dso;
-          if(count($curr_dso)==0)
-            $curr_dso = array();
-          $dso1 = array((string)$prov->attributes()->entityID);
-          $dso = array_merge($curr_dso,$dso1);
+        if($prov->extension->position && $prov->extension->position->attributes()->title ) {
+          if( $prov->extension->position->attributes()->title == "District Surveillance Officer" or
+              strpos($prov->extension->position->attributes()->title,"District Surveillance") !== false or
+              $prov->extension->position->attributes()->title == "DSO"){
+            $curr_dso = $dso;
+            if(count($curr_dso)==0)
+              $curr_dso = array();
+            $dso1 = array((string)$prov->attributes()->entityID);
+            $dso = array_merge($curr_dso,$dso1);
+          }
         }
       }
     }
@@ -210,14 +212,16 @@ class eidsr_base {
       $prov_entity = new SimpleXMLElement($prov_entity);
       foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
         global $cso;
-        if( $prov->extension->position->attributes()->title == "County Surveillance Officer" or
-            strpos($prov->extension->position->attributes()->title,"County Surveillance") !== false or
-            $prov->extension->position->attributes()->title == "CSO"){
-          $curr_cso = $cso;
-          if(count($curr_cso)==0)
-            $curr_cso = array();
-          $cso1 = array((string)$prov->attributes()->entityID);
-          $cso = array_merge($curr_cso,$cso1);
+        if($prov->extension->position && $prov->extension->position->attributes()->title ) {
+          if( $prov->extension->position->attributes()->title == "County Surveillance Officer" or
+              strpos($prov->extension->position->attributes()->title,"County Surveillance") !== false or
+              $prov->extension->position->attributes()->title == "CSO"){
+            $curr_cso = $cso;
+            if(count($curr_cso)==0)
+              $curr_cso = array();
+            $cso1 = array((string)$prov->attributes()->entityID);
+            $cso = array_merge($curr_cso,$cso1);
+          }
         }
       }
     }
@@ -249,14 +253,16 @@ class eidsr_base {
       $prov_entity = new SimpleXMLElement($prov_entity);
       foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
         global $cdo;
-        if( $prov->extension->position->attributes()->title == "County Diagnostic Officer" or
-            strpos($prov->extension->position->attributes()->title,"County Diagnostic") !== false or
-            $prov->extension->position->attributes()->title == "CDO"){
-          $curr_cdo = $cdo;
-          if(count($curr_cdo)==0)
-            $curr_cdo = array();
-          $cdo1 = array((string)$prov->attributes()->entityID);
-          $cdo = array_merge($curr_cdo,$cdo1);
+        if($prov->extension->position && $prov->extension->position->attributes()->title ) {
+          if( $prov->extension->position->attributes()->title == "County Diagnostic Officer" or
+              strpos($prov->extension->position->attributes()->title,"County Diagnostic") !== false or
+              $prov->extension->position->attributes()->title == "CDO"){
+            $curr_cdo = $cdo;
+            if(count($curr_cdo)==0)
+              $curr_cdo = array();
+            $cdo1 = array((string)$prov->attributes()->entityID);
+            $cdo = array_merge($curr_cdo,$cdo1);
+          }
         }
       }
     }
@@ -305,7 +311,7 @@ class eidsr_base {
       foreach($contacts_uuid as $uuid) {
         $post_data = '{ "contacts": ["'.$uuid.'"], "text": "'.$msg.'" }';
         error_log($post_data);
-        $this->exec_request($url,"","","POST",$post_data,$header);
+        //$this->exec_request($url,"","","POST",$post_data,$header);
       }
   }
 
@@ -350,7 +356,6 @@ class eidsr_base {
         return false;
     }
     curl_close($curl);
-    print_r($curl_out);
     return $curl_out;
   }
 

@@ -29,6 +29,7 @@ class eidsr extends eidsr_base{
     $this->eidsr_user = $eidsr_user;
     $this->eidsr_passwd = $eidsr_passwd;
     $this->facility_details = $this->get_provider_facility($this->reporter_globalid);
+    error_log(print_r($this->facility_details,true));
     $this->county_uuid = $this->facility_details["county_uuid"];
   }
 
@@ -156,6 +157,7 @@ class eidsr extends eidsr_base{
                   }';
     error_log($post_data);
     $response = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header,true);
+    error_log($response);
     list($header, $body) = explode("\r\n\r\n", $response, 2);
     if(count($header) == 0)
     error_log("Something went wrong,sync server returned no header");
@@ -227,7 +229,7 @@ session_write_close();
 //end of closing the connection,now start processing the request and start a separate flow
 
 require("config.php");
-//$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77878.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'3124c792-c322-4aed-8206-b7bcedddd46f','reporter_globalid'=>'urn:uuid:a5547568-a24c-39b7-b895-734ed8a777f2');
+$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77878.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:a5547568-a24c-39b7-b895-734ed8a777f2');
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
@@ -236,7 +238,7 @@ $reporter_rp_id = $_REQUEST["reporter_rp_id"];
 $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
 
-require("test_config.php");
+//require("test_config.php");
 $report = str_ireplace("alert.","",$report);
 $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
                     $rapidpro_url,$mhero_eidsr_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,
