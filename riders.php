@@ -114,7 +114,7 @@ class riders extends eidsr_base {
 /*This code sends a response to rapidpro and continue execution of the rest
 This is important because rapidpro webhook calling has a wait time limit,if exceeded then it will show the webhook calling has failed
 */
-$_REQUEST = array("category" => "sample_picked","samples"=>"Picked.grc-21m4-006","reporter_phone" => "088 684 7915","reporter_name" => "Stephen Mambu Gbanyan","reporter_rp_id" => "3124c792-c322-4aed-8206-b7bcedddd46f","reporter_globalid" =>"urn:uuid:a5547568-a24c-39b7-b895-734ed8a777f2");
+//$_REQUEST = array("category" => "sample_picked","samples"=>"Picked.grc-21m4-006","reporter_phone" => "088 684 7915","reporter_name" => "Stephen Mambu Gbanyan","reporter_rp_id" => "3124c792-c322-4aed-8206-b7bcedddd46f","reporter_globalid" =>"urn:uuid:a5547568-a24c-39b7-b895-734ed8a777f2");
 ob_start();
 echo '{"status":"processing"}';
 $size = ob_get_length();
