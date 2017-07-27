@@ -1,6 +1,9 @@
 <?php
-class eidsr_base {
-  function __construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd) {
+require ("openHimConfig.php");
+require ("openHimUtilities.php");
+class eidsr_base extends openHimUtilities {
+  function __construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$ohimApiHost,$ohimApiUser,$ohimApiPassword) {
+    parent::__construct($ohimApiHost,$ohimApiUser,$ohimApiPassword);
     $this->rapidpro_token = $rapidpro_token;
     $this->rapidpro_host = $rapidpro_url;
     $this->csd_host = $csd_host;
@@ -29,7 +32,7 @@ class eidsr_base {
     }
 
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:facility-search";
-    $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $fac_entity = $this->exec_request("Searching Facility",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $facility_uuid = $this->extract($fac_entity,"/csd:facility/@entityID",'facilityDirectory',true);
     $facility_name = $this->extract($fac_entity,"/csd:facility/csd:primaryName",'facilityDirectory',true);
     $facility_code = $this->extract($fac_entity,"/csd:facility/csd:otherID[@code='code']",'facilityDirectory',true);
@@ -40,7 +43,7 @@ class eidsr_base {
           </csd:id>
         </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:organization-search";
-    $org_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $org_entity = $this->exec_request("Searching District",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $county_uuid = $this->extract($org_entity,"/csd:organization/csd:parent/@entityID",'organizationDirectory',true);
     $district_name = $this->extract($org_entity,"/csd:organization/csd:primaryName",'organizationDirectory',true);
 
@@ -49,7 +52,7 @@ class eidsr_base {
           </csd:id>
         </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:organization-search";
-    $org_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $org_entity = $this->exec_request("Searching County",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $county_name = $this->extract($org_entity,"/csd:organization/csd:primaryName",'organizationDirectory',true);
 
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
@@ -57,7 +60,7 @@ class eidsr_base {
             <csd:otherID position="1"/>
           </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:organization_read_otherid";
-    $org_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $org_entity = $this->exec_request("Getting Other Id",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $county_code = $this->extract($org_entity,"/csd:organization/csd:otherID",'organizationDirectory',true);
 
     $fac_det = array("facility_uuid"=>$facility_uuid,
@@ -85,7 +88,7 @@ class eidsr_base {
            ."<csd:code>rapidpro_contact_id</csd:code>"
            ."  </csd:requestParams>" ;
     $url = $this->csd_host."csr/{$this->rp_csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:bulk_health_worker_read_otherids_json";
-    $prov_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $prov_entity = $this->exec_request("Getting Rapidpro Contact UUID",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     if (! is_array($all_resp = json_decode($prov_entity,true))
             || ! array_key_exists('results',$all_resp)
             || ! is_array($resp = $all_resp['results'])
@@ -125,9 +128,12 @@ class eidsr_base {
            <csd:parent entityID="'.$county_uuid.'"/>
           </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:organization-search";
-    $orgs_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $orgs_entity = $this->exec_request("Getting County Districts",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $orgs_uuids = $this->extract($orgs_entity,"/csd:organization/@entityID",'organizationDirectory',true);
     $distr_uuids = explode(";", $orgs_uuids);
+    if(count($distr_uuids) == 0) {
+      array_push($this->response_body,array("County Districts"=>"No Districts Found In A County"));
+    }
     return $distr_uuids;
   }
 
@@ -145,9 +151,11 @@ class eidsr_base {
             </csd:organizations>
           </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:facility-search";
-    $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $fac_entity = $this->exec_request("Getting District Facilities",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $fac = $this->extract($fac_entity,"/csd:facility/@entityID",'facilityDirectory',true);
     $fac_uuids = explode(";", $fac);
+    if(count($fac_uuids) == 0)
+    array_push($this->response_body,array("Districts Facilities"=>"No Facilities Found In A District"));
     return $fac_uuids;
   }
 
@@ -167,7 +175,7 @@ class eidsr_base {
            </csd:facilities>
           </csd:requestParams>';
       $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
-      $prov_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+      $prov_entity = $this->exec_request("Getting Providers In A Facility",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
       $prov_entity = new SimpleXMLElement($prov_entity);
       foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
         global $dso;
@@ -185,6 +193,12 @@ class eidsr_base {
       }
     }
     error_log("DSO===>" . print_r($dso,true));
+    if(count($dso) == 0) {
+      array_push($this->response_body,array("iHRIS DSO"=>"No DSO Found On The System For Reported Facility"));
+    }
+    else {
+      array_push($this->response_body,array("iHRIS DSO"=>$dso));
+    }
     return $dso;
   }
 
@@ -208,7 +222,7 @@ class eidsr_base {
            </csd:facilities>
           </csd:requestParams>';
       $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
-      $prov_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+      $prov_entity = $this->exec_request("Getting Providers In A Facility",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
       $prov_entity = new SimpleXMLElement($prov_entity);
       foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
         global $cso;
@@ -226,6 +240,12 @@ class eidsr_base {
       }
     }
     error_log("CSO===>" . print_r($cso,true));
+    if(count($cso) == 0) {
+      array_push($this->response_body,array("iHRIS CSO"=>"No CSO Found On The System For Reported Facility"));
+    }
+    else {
+      array_push($this->response_body,array("iHRIS CSO"=>$cso));
+    }
     return $cso;
   }
 
@@ -249,7 +269,7 @@ class eidsr_base {
            </csd:facilities>
           </csd:requestParams>';
       $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
-      $prov_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+      $prov_entity = $this->exec_request("Getting Providers In A Facility",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
       $prov_entity = new SimpleXMLElement($prov_entity);
       foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
         global $cdo;
@@ -267,6 +287,12 @@ class eidsr_base {
       }
     }
     error_log("CDO===>" . print_r($cdo,true));
+    if(count($cdo) == 0) {
+      array_push($this->response_body,array("iHRIS CDO"=>"No CDO Found On The System For Reported Facility"));
+    }
+    else {
+      array_push($this->response_body,array("iHRIS CDO"=>$cdo));
+    }
     return $cdo;
   }
 
@@ -276,7 +302,7 @@ class eidsr_base {
                          "Content-Type: application/json",
                          "Authorization: Token $this->rapidpro_token"
                    );
-    $res=  $this->exec_request($url,"","","GET","",$header);
+    $res=  $this->exec_request("Getting Raidpro Group UUID",$url,"","","GET","",$header);
     $res = json_decode($res,true);
     if(count($res["results"]) > 0){
       return $res["results"][0]["uuid"];
@@ -292,7 +318,7 @@ class eidsr_base {
                          "Content-Type: application/json",
                          "Authorization: Token $this->rapidpro_token"
                    );
-    $res=  $this->exec_request($url,"","","GET","",$header);
+    $res=  $this->exec_request("Getting Rapidpro Contacts In A Group",$url,"","","GET","",$header);
     $res = json_decode($res,true);
     if(count($res["results"]) > 0){
       foreach($res["results"] as $conts) {
@@ -302,17 +328,21 @@ class eidsr_base {
     return $contact_uuids;
   }
 
-  public function broadcast($contacts_uuid = array(),$msg) {
+  public function broadcast($subject="",$contacts_uuid = array(),$msg) {
     $url = $this->rapidpro_host."api/v2/broadcasts.json";
       $header = Array(
                        "Content-Type: application/json",
                        "Authorization: Token $this->rapidpro_token",
                      );
+      $broadcast_data = array();
       foreach($contacts_uuid as $uuid) {
         $post_data = '{ "contacts": ["'.$uuid.'"], "text": "'.$msg.'" }';
         error_log($post_data);
-        //$this->exec_request($url,"","","POST",$post_data,$header);
+        array_push($broadcast_data,json_decode($post_data));
+        //$this->exec_request("Sending Broadcast Message To Rapidpro Contacts",$url,"","","POST",$post_data,$header);
       }
+      //push data for reporting to openHIM
+      array_push($this->response_body,array($subject=>$broadcast_data));
   }
 
   public function start_flow($flow_uuid,$group_uuid,$contacts_uuid = array(),$extra) {
@@ -329,17 +359,21 @@ class eidsr_base {
                         "extra": {'.$extra.'}
                       }';
         error_log($post_data);
-        $this->exec_request($url,"","","POST",$post_data,$header);
+        //$this->exec_request("Starting A Workflow",$url,"","","POST",$post_data,$header);
       }
     }
   }
 
-  public function exec_request($url,$user,$password,$req_type,$post_data,$header = Array("Content-Type: text/xml"),$get_header=false) {
+  public function exec_request($request_name,$url,$user,$password,$req_type,$post_data,$header = Array("Content-Type: text/xml"),$get_header=false) {
+    if($request_name == "") {
+      error_log("Name of the request is missing");
+      return false;
+    }
+
     $curl =  curl_init($url);
     curl_setopt($curl, CURLOPT_HEADER, false);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
-    if($get_header)
     curl_setopt($curl, CURLOPT_HEADER, true);
     if($req_type == "POST") {
       curl_setopt($curl, CURLOPT_POST, true);
@@ -351,11 +385,29 @@ class eidsr_base {
     }
     if($user or $password)
       curl_setopt($curl, CURLOPT_USERPWD, $user.":".$password);
-      $curl_out = curl_exec($curl);
-      if ($err = curl_errno($curl) ) {
-        return false;
+    $curl_out = curl_exec($curl);
+    if ($err = curl_errno($curl) ) {
+      return false;
     }
+
+    //Orchestrations
+    //prepare data for orchestration
+    $status_code = curl_getinfo($curl,CURLINFO_HTTP_CODE);
+    $beforeTimestamp = date("Y-m-d G:i:s");
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($curl_out, 0, $header_size);
+    $body = substr($curl_out, $header_size);
+    //implement in case header is missing
+    //send orchestration
+    $newOrchestration = $this->buildOrchestration($request_name,$beforeTimestamp,$req_type,$url,$post_data,$status_code,$header,$body);
+    array_push($this->orchestrations, $newOrchestration);
+    //End of orchestration
+
     curl_close($curl);
+    if($get_header === false) {
+      return $body;
+    }
+    else
     return $curl_out;
   }
 

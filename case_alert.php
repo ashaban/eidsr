@@ -1,16 +1,17 @@
 <?php
 require("eidsr_base.php");
-
 class eidsr extends eidsr_base{
   function __construct(
                         $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,
                         $mhero_eidsr_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,
-                        $eidsr_passwd,$reported_disease
+                        $eidsr_passwd,$reported_disease,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword
                       ) {
     parent::__construct(
                         $rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,
-                        $eidsr_user,$eidsr_passwd
+                        $eidsr_user,$eidsr_passwd,$ohimApiHost,$ohimApiUser,$ohimApiPassword
                        );
+    $this->orchestrations = array();
+    $this->response_body = array();
     $this->reporter_phone = $reporter_phone;
     $this->reporter_name = $reporter_name;
     $this->report = $report;
@@ -28,8 +29,24 @@ class eidsr extends eidsr_base{
     $this->eidsr_host = $eidsr_host;
     $this->eidsr_user = $eidsr_user;
     $this->eidsr_passwd = $eidsr_passwd;
+    $this->openHimTransactionID = $openHimTransactionID;
+
+    //update opnHIM status to Processing
+    $timestamp = date("Y-m-d G:i:s");
+    $update = array("status"=>"Processing",
+                    "response"=>array("status"=>200,
+                                      "headers"=>array("content-type"=>"application/json+openhim"),
+                                      "timestamp"=> $timestamp,
+                                      "body"=>"Still Processing"
+                                     )
+                   );
+    $update = json_encode($update);
+    $this->updateTransaction($openHimTransactionID,$update);
+
     $this->facility_details = $this->get_provider_facility($this->reporter_globalid);
+    //if facility code is missing then stop execution or alert HMIS director
     error_log(print_r($this->facility_details,true));
+    array_push($this->response_body,array("Reporter Location Details"=>$this->facility_details));
     $this->county_uuid = $this->facility_details["county_uuid"];
   }
 
@@ -39,7 +56,7 @@ class eidsr extends eidsr_base{
           </csd:id>
         </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
-    $prov_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $prov_entity = $this->exec_request("Getting Reporter Details",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $fac_uuid = $this->extract($prov_entity,"/csd:provider/csd:facilities/csd:facility/@entityID",'providerDirectory',true);
     $fac_det = $this->get_facility_details ($fac_uuid,"uuid");
     return $fac_det;
@@ -51,7 +68,7 @@ class eidsr extends eidsr_base{
           <csd:otherID position="2"/>
         </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:facility_read_otherid";
-    $fac_entity = $this->exec_request($url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $fac_entity = $this->exec_request("Getting Facility Other Id",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
     $dhis2_fac_uid = $this->extract($fac_entity,"/csd:facility/csd:otherID",'facilityDirectory',true);
     return $dhis2_fac_uid;
   }
@@ -80,8 +97,14 @@ class eidsr extends eidsr_base{
       $specimen = strtolower($report[2]);
       $this->specimen = ucfirst($possible_specimen[$specimen]);
     }
-    if($this->caseid === false)
-    return false;
+    if($this->specimen == "") {
+      array_push($this->response_body,array("Case Details"=>"Specimen Collection Was Not Specified"));
+    }
+
+    if($this->caseid === false) {
+      array_push($this->response_body,array("Case Details"=>"Case ID is Missing"));
+      return false;
+    }
     else
     return true;
   }
@@ -98,7 +121,7 @@ class eidsr extends eidsr_base{
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.".";
       if($this->specimen)
       $msg .= "A sample was also taken for Riders to pick";
-      $this->broadcast($cont_alert,$msg);
+      $this->broadcast("Alert Partners",$cont_alert,$msg);
     }
 
     //alert CSO
@@ -108,7 +131,7 @@ class eidsr extends eidsr_base{
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.". Please verify with DSO";
       if($this->specimen)
       $msg .= ".A sample was also taken for Riders to pick";
-      $this->broadcast($cont_alert,$msg);
+      $this->broadcast("Alert CSO",$cont_alert,$msg);
     }
 
     //alert DSO
@@ -118,7 +141,7 @@ class eidsr extends eidsr_base{
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") With IDSRID ".$idsrid." By ".$this->reporter_name."(".$this->reporter_phone."). Please call or visit health facility to verify";
       if($this->specimen)
       $msg .= ".A sample was also taken for Riders to pick";
-      $this->broadcast($cont_alert,$msg);
+      $this->broadcast("Alert DSO",$cont_alert,$msg);
     }
 
     //alert CDO
@@ -128,7 +151,7 @@ class eidsr extends eidsr_base{
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].")";
       if($this->specimen)
       $msg .= ".A sample was also taken for Riders to pick";
-      $this->broadcast($cont_alert,$msg);
+      $this->broadcast("Alert CDO",$cont_alert,$msg);
     }
 
     //if sample collected then alert Riders dispatch
@@ -136,7 +159,7 @@ class eidsr extends eidsr_base{
       $riders_contacts = $this->get_contacts_in_grp(urlencode("Riders Dispatch"));
       if(count($riders_contacts) > 0) {
         $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") With IDSRID ".$idsrid.". Sample is available at this facility for you to pick";
-        $this->broadcast($riders_contacts,$msg);
+        $this->broadcast("Alert Riders",$riders_contacts,$msg);
       }
     }
     return;
@@ -156,8 +179,7 @@ class eidsr extends eidsr_base{
                     "specimenCollected":"'.$this->specimen.'"
                   }';
     error_log($post_data);
-    $response = $this->exec_request($this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header,true);
-    error_log($response);
+    $response = $this->exec_request("Submitting Case Alert To Offline Tracker",$this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header,true);
     list($header, $body) = explode("\r\n\r\n", $response, 2);
     if(count($header) == 0)
     error_log("Something went wrong,sync server returned no header");
@@ -175,6 +197,8 @@ class eidsr extends eidsr_base{
                                           "reporter_globalid"=>$this->reporter_globalid,
                                           "facility_code"=>$this->facility_details["facility_code"]
                                          );
+    //report this to openHIM
+    array_push($this->response_body,array("Case Details"=>$reported_cases[$total_cases]));
     $reported_cases = json_encode($reported_cases,true);
     file_put_contents("reported_cases.json",$reported_cases);
     $header = explode("\r\n",$header);
@@ -205,7 +229,7 @@ class eidsr extends eidsr_base{
     $header = Array(
                     "Content-Type: application/json"
                    );
-    $response = $this->exec_request($url,$this->eidsr_user,$this->eidsr_passwd,"PUT",$post_data,$header);
+    $response = $this->exec_request("Updating Case Alert In Offline Tracker",$url,$this->eidsr_user,$this->eidsr_passwd,"PUT",$post_data,$header);
     error_log($response);
   }
 
@@ -215,9 +239,12 @@ class eidsr extends eidsr_base{
 /*This code sends a response to rapidpro and continue execution of the rest
 This is important because rapidpro webhook calling has a wait time limit,if exceeded then it will show the webhook calling has failed
 */
+$headers = getallheaders();
+$openHimTransactionID = $headers["X-OpenHIM-TransactionID"];
 ob_start();
 echo '{"status":"processing"}';
 $size = ob_get_length();
+http_response_code(404);
 header("Content-Encoding: none");
 header("Content-Length: {$size}");
 header("Connection: close");
@@ -226,10 +253,12 @@ ob_flush();
 flush();
 if(session_id())
 session_write_close();
+
 //end of closing the connection,now start processing the request and start a separate flow
 
-require("config.php");
-$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77878.yes','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:a5547568-a24c-39b7-b895-734ed8a777f2');
+require("config.php");require("openHimConfig.php");
+
+$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77878','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:c8125cb3-3bb6-3676-835d-7bc3290add6f');
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
@@ -242,7 +271,7 @@ $reporter_globalid = $_REQUEST["reporter_globalid"];
 $report = str_ireplace("alert.","",$report);
 $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
                     $rapidpro_url,$mhero_eidsr_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,
-                    $eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease
+                    $eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword
                   );
 
 //if no facility for the reporter then
@@ -260,10 +289,34 @@ if($category == "alert_all") {
     $trackerid = $sync_server_results["trackerid"];
     $eidsr->alert_all($idsrid);
     $extra = '"trackerid":"'.$trackerid.'","idsrid":"'.$idsrid.'","disease_name":"'.$reported_disease.'","specimenCollected":"'.$eidsr->specimen.'"';
-    $eidsr->start_flow($eidsr->mhero_eidsr_flow_uuid,"",array($reporter_rp_id),$extra);
+    //$eidsr->start_flow($eidsr->mhero_eidsr_flow_uuid,"",array($reporter_rp_id),$extra);
+    $timestamp = date("Y-m-d G:i:s");
+    $body = json_encode($eidsr->response_body);
+    $update = array("status"=>"Completed",
+                    "response"=>array("status"=>200,
+                                      "headers"=>array("content-type"=>"application/json+openhim"),
+                                      "timestamp"=> $timestamp,
+                                      "body"=>$body
+                                     ),
+                    "orchestrations"=>$eidsr->orchestrations
+                   );
+    $update = json_encode($update);
+    $eidsr->updateTransaction($openHimTransactionID,$update);
   }
   else {
     $eidsr->broadcast(array($reporter_rp_id),"Case Id for this case report is missing,please resubmit the case with case ID");
+    $timestamp = date("Y-m-d G:i:s");
+    $body = json_encode($eidsr->response_body);
+    $update = array("status"=>"Failed",
+                    "response"=>array("status"=>422,
+                                      "headers"=>array("content-type"=>"application/json+openhim"),
+                                      "timestamp"=> $timestamp,
+                                      "body"=>$body
+                                     ),
+                    "orchestrations"=>$eidsr->orchestrations
+                   );
+    $update = json_encode($update);
+    $eidsr->updateTransaction($openHimTransactionID,$update);
     return;
   }
 }
