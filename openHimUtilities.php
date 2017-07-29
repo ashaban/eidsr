@@ -43,7 +43,7 @@ class openHimUtilities{
 
   public function genAuthHeaders() {
     $salt = $this->authUserMap[$this->openhim_core_user];
-    error_log("Slt==>".$salt);
+    error_log("Salt==>".$salt);
     if($salt == "") {
       error_log($this->openhim_core_user." Is not authenticated");
       return false;
@@ -88,6 +88,23 @@ class openHimUtilities{
     curl_close($curl);
   }
 
+  public function getTransactionData($transactionId) {
+    $this->authenticate();
+    $headers = $this->genAuthHeaders();
+    print_r($headers);
+    $url = $this->openhim_core_host . '/transactions/' . $transactionId;
+    $curl =  curl_init($url);
+    curl_setopt($curl, CURLOPT_HEADER, true);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($curl, CURLOPT_HEADER, true);
+    $curl_out = curl_exec($curl);
+    print_r($curl_out);
+    if ($err = curl_errno($curl) ) {
+      return false;
+    }
+  }
+
   public function buildOrchestration ($name, $beforeTimestamp, $method, $url, $requestBody, $statusCode,$responseHeaders, $responseBody) {
     $parsed_url = parse_url($url);
     if(array_key_exists("path",$parsed_url)) {
@@ -113,4 +130,7 @@ class openHimUtilities{
       return $orchestration;
   }
 }
+include("openHimConfig.php");
+$obj = new openHimUtilities($ohimApiHost,$ohimApiUser,$ohimApiPassword);
+$obj->getTransactionData("5979fa7e2cad6308f0fafa6e");
 ?>

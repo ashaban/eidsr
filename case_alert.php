@@ -125,7 +125,7 @@ class eidsr extends eidsr_base{
     }
 
     //alert CSO
-    $cso = $this->get_cso($this->facility_details["county_uuid"]);
+    //$cso = $this->get_cso($this->facility_details["county_uuid"]);
     $cont_alert = $this->get_rapidpro_id($cso);
     if(count($cont_alert) > 0) {
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.". Please verify with DSO";
@@ -135,7 +135,7 @@ class eidsr extends eidsr_base{
     }
 
     //alert DSO
-    $dso = $this->get_dso($this->facility_details["district_uuid"]);
+    //$dso = $this->get_dso($this->facility_details["district_uuid"]);
     $cont_alert = $this->get_rapidpro_id($dso);
     if(count($cont_alert) > 0) {
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") With IDSRID ".$idsrid." By ".$this->reporter_name."(".$this->reporter_phone."). Please call or visit health facility to verify";
@@ -145,7 +145,7 @@ class eidsr extends eidsr_base{
     }
 
     //alert CDO
-    $cdo = $this->get_cdo($this->facility_details["county_uuid"]);
+    //$cdo = $this->get_cdo($this->facility_details["county_uuid"]);
     $cont_alert = $this->get_rapidpro_id($cdo);
     if(count($cont_alert) > 0) {
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].")";
@@ -185,6 +185,14 @@ class eidsr extends eidsr_base{
     error_log("Something went wrong,sync server returned no header");
     if(count($body) == 0)
     error_log("Something went wrong,sync server returned no body");
+
+    if(stripos($header,400) !== false) {
+      //report this to openHIM
+      error_log($response);
+      array_push($this->response_body,array("Case Details"=>$body));
+      return false;
+    }
+
     $body = json_decode($body,true);
     $idsrid = strtoupper($body["caseInfo"]["idsrId"]);
 
