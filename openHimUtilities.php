@@ -12,15 +12,14 @@ class openHimUtilities{
   public function authenticate() {
     $url = $this->openhim_core_host."/authenticate/".$this->openhim_core_user;
     $curl =  curl_init($url);
-    curl_setopt($curl, CURLOPT_HEADER, false);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_HEADER, true);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     $curl_out = curl_exec($curl);
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($curl_out, 0, $header_size);
     $body = substr($curl_out, $header_size);
-
     if ($err = curl_errno($curl) ) {
       echo $err;
       return false;
@@ -43,7 +42,6 @@ class openHimUtilities{
 
   public function genAuthHeaders() {
     $salt = $this->authUserMap[$this->openhim_core_user];
-    error_log("Salt==>".$salt);
     if($salt == "") {
       error_log($this->openhim_core_user." Is not authenticated");
       return false;
@@ -61,11 +59,18 @@ class openHimUtilities{
     return $header;
   }
 
-  public function updateTransaction($transactionId,$update=array()) {
-    if(count($update) == 0) {
-      error_log("Empty Update Passed for transaction ".$transactionId);
-      //return false;
-    }
+  public function updateTransaction($transactionId,$transaction_status,$response_body,$response_code,$orchestrations=array()) {
+    $timestamp = date("Y-m-d G:i:s");
+    $body = json_encode($response_body);
+    $update = array("status"=>$transaction_status,
+                    "response"=>array("status"=>$response_code,
+                                      "headers"=>array("content-type"=>"application/json+openhim"),
+                                      "timestamp"=> $timestamp,
+                                      "body"=>$body
+                                     ),
+                    "orchestrations"=>$orchestrations
+                   );
+    $update = json_encode($update);
     if(!$transactionId) {
       error_log("Empty transactionId passed");
       return false;
@@ -75,10 +80,10 @@ class openHimUtilities{
     array_push($headers,"content-type:application/json");
     $url = $this->openhim_core_host . '/transactions/' . $transactionId;
     $curl =  curl_init($url);
-    error_log($url);
     curl_setopt($curl, CURLOPT_HEADER, true);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($curl, CURLOPT_HEADER, true);
     curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -91,22 +96,27 @@ class openHimUtilities{
   public function getTransactionData($transactionId) {
     $this->authenticate();
     $headers = $this->genAuthHeaders();
-    print_r($headers);
-    $url = $this->openhim_core_host . '/transactions/' . $transactionId;
+    $url = $this->openhim_core_host . '/transactions/'.$transactionId;
     $curl =  curl_init($url);
     curl_setopt($curl, CURLOPT_HEADER, true);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($curl, CURLOPT_HEADER, true);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     $curl_out = curl_exec($curl);
-    print_r($curl_out);
     if ($err = curl_errno($curl) ) {
       return false;
     }
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($curl_out, 0, $header_size);
+    $body = substr($curl_out, $header_size);
+    return $body;
   }
 
   public function buildOrchestration ($name, $beforeTimestamp, $method, $url, $requestBody, $statusCode,$responseHeaders, $responseBody) {
     $parsed_url = parse_url($url);
+    $this->url_query = null;
+    $this->url_path = null;
     if(array_key_exists("path",$parsed_url)) {
       $this->url_path = $parsed_url["path"];
     }
@@ -130,7 +140,26 @@ class openHimUtilities{
       return $orchestration;
   }
 }
+/*
 include("openHimConfig.php");
 $obj = new openHimUtilities($ohimApiHost,$ohimApiUser,$ohimApiPassword);
-$obj->getTransactionData("5979fa7e2cad6308f0fafa6e");
+$data = $obj->getTransactionData("597d16719fe74a11201eef1c");
+$data = json_decode($data,true);
+$body = $data["response"]["body"];
+$body = json_decode($body,true);
+if (json_last_error() === JSON_ERROR_NONE) {
+  if(in_array("Still Processing",$body)) {
+    $body = array("Hello1");
+  }
+  else
+  array_push($body,array("Hello2"));
+  $data["response"]["body"] = $body;
+  }
+else {
+  $data["response"]["body"] = array("Hello3");
+  echo "Here";
+}
+
+print_r($data);
+*/
 ?>

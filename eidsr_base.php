@@ -167,6 +167,7 @@ class eidsr_base extends openHimUtilities {
     //get facilities under $district_uuid
     $fac_uuids = $this->get_district_facilities($district_uuid);
     //foreach facility,fetch providers and check if is DSO
+    global $dso;
     $dso = array();
     foreach ($fac_uuids as $fac_uuid) {
       $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
@@ -214,6 +215,7 @@ class eidsr_base extends openHimUtilities {
     }
 
     //foreach facility,fetch providers and check if is DSO
+    global $cso;
     $cso = array();
     foreach ($fac_uuids as $fac_uuid) {
       $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
@@ -339,7 +341,7 @@ class eidsr_base extends openHimUtilities {
         $post_data = '{ "contacts": ["'.$uuid.'"], "text": "'.$msg.'" }';
         error_log($post_data);
         array_push($broadcast_data,json_decode($post_data));
-        //$this->exec_request("Sending Broadcast Message To Rapidpro Contacts",$url,"","","POST",$post_data,$header);
+        $this->exec_request("Sending Broadcast Message To Rapidpro Contacts",$url,"","","POST",$post_data,$header);
       }
       //push data for reporting to openHIM
       array_push($this->response_body,array($subject=>$broadcast_data));
@@ -359,7 +361,7 @@ class eidsr_base extends openHimUtilities {
                         "extra": {'.$extra.'}
                       }';
         error_log($post_data);
-        //$this->exec_request("Starting A Workflow",$url,"","","POST",$post_data,$header);
+        $this->exec_request("Starting A Workflow",$url,"","","POST",$post_data,$header);
       }
     }
   }
@@ -387,12 +389,15 @@ class eidsr_base extends openHimUtilities {
       curl_setopt($curl, CURLOPT_USERPWD, $user.":".$password);
     $curl_out = curl_exec($curl);
     if ($err = curl_errno($curl) ) {
+      error_log($err. $url);
       return false;
     }
 
     //Orchestrations
     //prepare data for orchestration
     $status_code = curl_getinfo($curl,CURLINFO_HTTP_CODE);
+    if($status_code >= 400 && $status_code <= 600)
+    $this->transaction_status = "Completed with error(s)";
     $beforeTimestamp = date("Y-m-d G:i:s");
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($curl_out, 0, $header_size);
