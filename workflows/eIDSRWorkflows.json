@@ -1,0 +1,2637 @@
+{
+  "campaigns": [], 
+  "version": 10, 
+  "site": "https://app.rapidpro.io", 
+  "flows": [
+    {
+      "base_language": "eng", 
+      "action_sets": [
+        {
+          "y": 206, 
+          "x": 750, 
+          "destination": null, 
+          "uuid": "dabd0f30-a2d0-48b0-be2c-4a324ab22f39", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Your message was not processed,please send message in the format\ndelivered.sample-id1.sample-id2.lab name\nwhere sample-id1,2 are the IDs of samples delivered"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 211, 
+          "x": 349, 
+          "destination": null, 
+          "uuid": "c63cecd5-79da-400e-9f90-8fd995b41f95", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Sample(s) @extra.samples Accepted for Delivery.Thank you for delivering samples to the Lab. DSO,CSO,facility and others were informed"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 69, 
+          "x": 1044, 
+          "destination": null, 
+          "uuid": "ef821a7e-b058-4b2b-ac3f-51f316c7a41d", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Sample(s) with ID @extra.samples were not found on the system,please check and resend."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }
+      ], 
+      "version": 10, 
+      "flow_type": "F", 
+      "entry": "dd911524-d633-4880-b6a7-4dd2e2520193", 
+      "rule_sets": [
+        {
+          "uuid": "dd911524-d633-4880-b6a7-4dd2e2520193", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "success"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Success"
+              }, 
+              "destination": "c63cecd5-79da-400e-9f90-8fd995b41f95", 
+              "uuid": "35bea25b-547f-4899-af8a-22ad154aa2d6", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "incomplete"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Incomplete"
+              }, 
+              "destination": "dabd0f30-a2d0-48b0-be2c-4a324ab22f39", 
+              "uuid": "da77f716-d9f7-4354-8348-2ef9817f4934", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "not_found"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Not_found"
+              }, 
+              "destination": "ef821a7e-b058-4b2b-ac3f-51f316c7a41d", 
+              "uuid": "8263ba4a-4de3-411f-8e9c-9dc0d22741e1", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "uuid": "15c38129-48b1-4493-8d2d-7c24189a186b"
+            }
+          ], 
+          "ruleset_type": "expression", 
+          "label": "response", 
+          "operand": "@extra.status", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 0, 
+          "x": 620, 
+          "config": {}
+        }
+      ], 
+      "metadata": {
+        "expires": 10080, 
+        "saved_on": "2017-08-30T04:16:31.062666Z", 
+        "uuid": "81a2f0ed-2451-4db0-8a92-7716ead14e16", 
+        "name": "mHero eIDSR Sample Delivered", 
+        "revision": 14
+      }
+    }, 
+    {
+      "base_language": "eng", 
+      "action_sets": [
+        {
+          "y": 115, 
+          "x": 622, 
+          "destination": null, 
+          "uuid": "62d039e4-5157-4156-8f88-c2494dfd6321", 
+          "actions": [
+            {
+              "action": "GET", 
+              "type": "api", 
+              "webhook": "http://username:password@52.18.125.4:5001/rider?category=sample_picked&samples=@flow.samples.text&reporter_phone=@contact.tel&reporter_name=@contact.name&reporter_rp_id=@contact.uuid&reporter_globalid=@contact.globalid", 
+              "webhook_headers": []
+            }
+          ]
+        }
+      ], 
+      "version": 10, 
+      "flow_type": "F", 
+      "entry": "05a9209e-7141-425d-bcee-c87d8aafd8ff", 
+      "rule_sets": [
+        {
+          "uuid": "05a9209e-7141-425d-bcee-c87d8aafd8ff", 
+          "rules": [
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "All Responses"
+              }, 
+              "destination": "62d039e4-5157-4156-8f88-c2494dfd6321", 
+              "uuid": "6a9ce553-6df6-4533-8cb8-03d8a4d5f013", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "wait_message", 
+          "label": "samples", 
+          "operand": "@step.value", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 0, 
+          "x": 524, 
+          "config": {}
+        }
+      ], 
+      "metadata": {
+        "expires": 10080, 
+        "saved_on": "2017-08-30T05:42:17.071833Z", 
+        "uuid": "48291e6b-e8f9-48d4-8e82-71b76c8d0a8d", 
+        "name": "mHero eIDSR Sample Picked Base", 
+        "revision": 7
+      }
+    }, 
+    {
+      "base_language": "eng", 
+      "action_sets": [
+        {
+          "y": 145, 
+          "x": 607, 
+          "destination": null, 
+          "uuid": "a5cdb113-9b6c-440b-8ed4-208996457e7f", 
+          "actions": [
+            {
+              "action": "POST", 
+              "type": "api", 
+              "webhook": "http://username:password@52.18.125.4:5001/rider?category=sample_delivered&samples=@flow.samples.text&reporter_phone=@contact.tel&reporter_name=@contact.name&reporter_rp_id=@contact.uuid&reporter_globalid=@contact.globalid", 
+              "webhook_headers": []
+            }
+          ]
+        }
+      ], 
+      "version": 10, 
+      "flow_type": "F", 
+      "entry": "e9698992-4a83-433a-9afb-1f283a077d24", 
+      "rule_sets": [
+        {
+          "uuid": "e9698992-4a83-433a-9afb-1f283a077d24", 
+          "rules": [
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "All Responses"
+              }, 
+              "destination": "a5cdb113-9b6c-440b-8ed4-208996457e7f", 
+              "uuid": "d254a4da-a02c-46f9-9274-ea9ac645b85c", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "wait_message", 
+          "label": "samples", 
+          "operand": "@step.value", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 0, 
+          "x": 524, 
+          "config": {}
+        }
+      ], 
+      "metadata": {
+        "expires": 10080, 
+        "revision": 29, 
+        "uuid": "32041105-36cb-4940-9a63-c6880976d274", 
+        "name": "mHero eIDSR Sample Delivered Base", 
+        "saved_on": "2017-08-30T05:46:27.638388Z"
+      }
+    }, 
+    {
+      "base_language": "eng", 
+      "action_sets": [
+        {
+          "y": 0, 
+          "x": 931, 
+          "destination": null, 
+          "uuid": "bc492e89-2160-4358-b135-0fc49232b498", 
+          "actions": [
+            {
+              "contacts": [], 
+              "media": {}, 
+              "variables": [], 
+              "groups": [
+                {
+                  "name": "Riders Dispatch Testing", 
+                  "uuid": "3460f683-61c5-47d3-86db-3721ae166e7c"
+                }
+              ], 
+              "msg": {
+                "eng": "There is a sample for pick up at @extra.facility facility with idsrid @extra.idsrid. Please send a driver for pick up."
+              }, 
+              "type": "send"
+            }, 
+            {
+              "msg": {
+                "eng": "An alert was sent to Riders Dispatch.\nThank you."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 53, 
+          "x": 311, 
+          "destination": null, 
+          "uuid": "64fb362b-969c-46ff-a1ae-64bbff285593", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "You are not permitted to request sample pickup by Riders Dispatch"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }
+      ], 
+      "version": 10, 
+      "flow_type": "F", 
+      "entry": "e09625b7-3e12-4cf5-9710-22a2fb24f217", 
+      "rule_sets": [
+        {
+          "uuid": "e09625b7-3e12-4cf5-9710-22a2fb24f217", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "Unknown"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "64fb362b-969c-46ff-a1ae-64bbff285593", 
+              "uuid": "13465f8a-5c59-47be-b42b-3ec761e954a8", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "destination": "bc492e89-2160-4358-b135-0fc49232b498", 
+              "uuid": "8cb70339-29cb-4822-9538-65548916aa62", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "expression", 
+          "label": "Facility Exists", 
+          "operand": "@extra.facility", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 0, 
+          "x": 614, 
+          "config": {}
+        }
+      ], 
+      "metadata": {
+        "expires": 10080, 
+        "revision": 5, 
+        "uuid": "2aac0c60-a0e9-4450-a3be-940e7cad01a4", 
+        "name": "mHero eIDSR Request Rider Pickup Relay Facility", 
+        "saved_on": "2017-08-29T12:40:37.937801Z"
+      }
+    }, 
+    {
+      "base_language": "eng", 
+      "action_sets": [
+        {
+          "y": 217, 
+          "x": 1319, 
+          "destination": "a5421b4a-b0dc-4ec5-986f-aa9be28be079", 
+          "uuid": "96ebeadd-ec1b-47f7-9fe7-7387acd1ea75", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "@contact.name,  We did not understand your ALERT. Please either resend or call your DSO immediately."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 269, 
+          "x": 396, 
+          "destination": null, 
+          "uuid": "903eedd9-42d2-4b41-8759-d4424b950920", 
+          "actions": [
+            {
+              "action": "GET", 
+              "type": "api", 
+              "webhook": "http://username:password@52.18.125.4:5001/eidsrAlert?category=alert_all&report=@flow.suspected_report.text&reporter_phone=@contact.tel&reporter_name=@contact.name&reported_disease=@flow.suspected_report.category&reporter_rp_id=@contact.uuid&reporter_globalid=@contact.globalid", 
+              "webhook_headers": []
+            }
+          ]
+        }
+      ], 
+      "version": 10, 
+      "flow_type": "F", 
+      "entry": "a5421b4a-b0dc-4ec5-986f-aa9be28be079", 
+      "rule_sets": [
+        {
+          "uuid": "a5421b4a-b0dc-4ec5-986f-aa9be28be079", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "LF"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Lassa Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "351fe4da-0494-4dd0-8cb8-4e6c255ec7b6", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Lassa"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Lassa Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "33aca863-04f3-4705-bacd-235c70efccfd", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Lasa Fever"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Lassa Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "9b23bf6a-44fa-48be-b840-b99a8cab0188", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "L Fever"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Lassa Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "ed18a1ff-4142-4065-a00a-4464a1d92657", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Ebola"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "VHF (EVD)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "12a04acd-7805-4df5-b0c2-e378f53ebcae", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "VHF"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "VHF (EVD)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "81069817-cd72-4fb0-ae11-d3777e616746", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Yellow Fever"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Yellow Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "780c9390-b515-4320-895b-118164303618", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "YF"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Yellow Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "a73f4029-3026-4e78-b142-7fbf43c590f9", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Maternal Death"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Maternal Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "927c884a-5f83-4a3f-8c7c-edb4f0bcafba", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "MD"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Maternal Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "6cfac643-2323-4a9b-b891-8fa9e7f3a99d", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Neonatal Death"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Neonatal Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "2a85b6c4-fd80-4a20-8575-2ea224526440", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "ND"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Neonatal Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "4b0b410e-194e-4024-b06a-1932d9e65630", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Cholera"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Cholera (AWD)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "45f4d368-5abb-4567-9984-2770a4d3f55d", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "CH"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Cholera (AWD)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "90276ce2-642e-4a96-b2e8-2c0879ad004a", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Cluster of Death"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "7ab4937d-ebbe-458e-94f4-83f12ae061e7", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "CD"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "db024590-6360-4839-a461-4a017969dbe4", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Cluster of Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "81f5cfff-8bfb-4566-8650-226820d5ef9f", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "CE"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "91f7279b-8079-49b5-a78b-ba1a5a9b1316", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Bloody Diarrhea (Shigella)"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Bloody Diarrhea (Shigellosis)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "c9267b31-3a95-463a-ac87-622dddf75e8d", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "ABD"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Bloody Diarrhea (Shigellosis)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "963a246d-e8ae-4796-8195-6d6503cf8f52", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Bloody"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Bloody Diarrhea (Shigellosis)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "f210352c-9604-4d30-b908-546426fcadb0", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Human Rabies"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Human Rabies"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "0f8141f1-2231-484a-b4d2-95aee7210106", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "H Rabies"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Human Rabies"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "05645adf-61b7-411d-b8ba-99fc8b23ce89", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "HR"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Human Rabies"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "3192b21f-9e55-4dc6-aee9-1dfaa9341d48", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "SPOTS"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Measles"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "624d2aa3-6b09-49c4-8d57-fd82f5c68504", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "mea"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Measles"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "286fad52-c05f-4410-bc4b-e4205078facb", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "mls"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "measles"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "e8a03b5c-466a-4ca3-a76a-a50922c13874", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Meningitis Meningits"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Meningitis"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "9e1916b7-f4cc-4a6d-8e9b-d8f4617a9b5f", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "M 1"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Meningitis"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "98a9e8a4-81e1-41ae-9b6b-fbf0a16bfed0", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Men"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Meningitis"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "68c995fe-b11f-434a-a671-ef39a8f95656", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Viral Hemorrhagic Fevers"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "VHF (EVD)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "62d3aadd-6057-4cb9-8b53-9b6f36a72d5e", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "VHF"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "VHF (EVD)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "bfaf4eef-3f57-42f6-ae13-affd22032099", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "EVD"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "VHF (EVD)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "bcb0bee8-94a9-496b-b187-77da7364ee14", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained cluster of health"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "824c87ed-cd2c-4fa0-a4c1-b5402066aab4", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "UCOH"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "e8379b9a-5606-413e-8c1b-d9613d4d31db", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "cluster of health"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "ccacab84-0b28-4459-89ed-d88a583afb1a", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Y Fever"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Yellow Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "363e8516-56ef-4d17-ae91-5f375f205dd3", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Yellow F"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Yellow Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "1a4794da-7cbb-45c7-8883-6688d3d85f66", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Lasa"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Lassa Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "9e9c2a56-cb11-484b-981f-3787175d3d22", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Flaccid Paralysis"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Flacid Paralysis (AFP)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "06ff0fd0-8ed3-48d2-bd13-551b8c4556c1", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "AFP"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Flacid Paralysis (AFP)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "89f77886-fbdb-4777-a352-0763bbb1e3d7", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Flacid Flaccid Paralysis"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Flacid Paralysis (AFP)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "6361f509-6afa-4c9d-bc4f-f765f040bbf7", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Flaccid"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Flacid Paralysis (AFP)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "3c711db8-3bac-4ba5-8078-c56636a22ec9", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Paralysis"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Flacid Paralysis (AFP)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "cbf2c5a9-c4ed-48a8-ae62-ce14ca0fa676", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Yelow"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Yellow Fever"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "3734d700-8ec4-42fb-af2f-b6e0241e7d42", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Cluster Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "6370dae5-eb0a-4e7c-bb0c-dcf5670098a9", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster of Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "8ad7e4e1-fe4c-4829-b56b-019958619a72", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "bbff65f6-0812-450a-928a-e5853dab01f2", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "14588f0f-c9dd-479d-9e49-5d6aa6d79bfc", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "MaternalDeath"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Maternal Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "8433ff76-6358-46b5-8cb7-093283e14b3e", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "NeonatalDeath"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Neonatal Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "a8982e0c-52fd-4929-9311-4e5ead7ceece", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Chlr"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Cholera (AWD)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "9e342f25-1212-4aa5-ad82-274e6fffdb2a", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster of Death"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "5c885a07-7a00-480b-b46b-b6dcec69819c", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained of Death"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "1986dfb4-b23f-430d-92fe-a329a416f5d4", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Death"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "6217c11d-e590-49f6-9220-e5c20570ac91", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained of health"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "497ec4a9-acc3-4f14-a1cf-c563fdf0bec4", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained health"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "2b734db7-5d13-4e1b-bdf6-9b95c982530e", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Cluster health"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "6012cf2c-c96e-4faa-90df-78c4bcb42b83", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster of Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "dfd23a4f-0445-47e3-84df-39cc887960f3", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "64f7e02b-9953-4c3d-89c0-b4e1127f4b3a", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained of Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "51499a93-c55f-4054-b766-ba249047d729", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Cluster Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "a91334dc-56df-45ad-a382-b837d30d4a39", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster Events"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "d6f8e968-7cce-4abe-9cf8-123ea3e54331", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster Death"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "55594d1d-ad73-458f-b94f-9cf3810f1f09", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Cluster Death"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "e2828d55-f4db-46d2-a048-c126af4b01d9", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster Death"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Death"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "16acb67e-9167-4e41-b0cf-0ecb7211777b", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster health"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "d719e0c2-8a59-4764-bf38-f19c512b1e27", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Diarrhea"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Bloody Diarrhea (Shigellosis)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "6c8bbf7e-988b-4de1-8cca-e506eafaeaf0", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Shigellosis"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Bloody Diarrhea (Shigellosis)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "827be36b-9b7c-4b9b-a7ac-d699f5b1e1bd", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Blood Diarrhea"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Bloody Diarrhea (Shigellosis)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "7d668379-9013-47de-9617-b79ac1317fd7", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Blood"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Bloody Diarrhea (Shigellosis)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "36d3cc6d-7391-431e-a78d-66bc611f7426", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Blood Diarrhea"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Bloody Diarrhea (Shigellosis)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "90476f9a-1bf3-4cd7-a7ba-feb82efc60e1", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Bloody Diarrhea"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Bloody Diarrhea (Shigellosis)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "cc97db3c-e8b9-4aac-a242-db15477cf713", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Measles"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Measles"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "0ed30da5-f42b-4552-b4c4-37777ec22fc1", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Flacid Paralysis"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Flacid Paralysis (AFP)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "6131513f-98b5-4db1-9255-9621945d3d77", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Flacid"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Flacid Paralysis (AFP)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "0acc23aa-2803-42c0-a5e7-ca2953ccf8b8", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Flacid Paralysis"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Flacid Paralysis (AFP)"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "b4aeabaf-1589-4525-a05a-2a6f0d4ede5a", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Health Event"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "ac05af42-7296-42fc-966f-d5be40ca7df9", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster of Health Event"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "4ea93cf9-3b6e-4ed8-ba96-7a2b3a1c50a8", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Unexplained Cluster of Health Event"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "ce51c3d8-3471-4b5a-88c6-ace6052b2e77", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Cluster of Health Event"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Unexplained Cluster of Health Event"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "5317579f-f04e-41bc-9f02-7bf8ee2a624b", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Neonatal Tetanus"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Neonatal Tetanus"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "d55e7a96-736d-42c9-b62f-edc17ed39439", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Tetanus"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Neonatal Tetanus"
+              }, 
+              "destination": "903eedd9-42d2-4b41-8759-d4424b950920", 
+              "uuid": "5848e5a8-b0e0-4627-8647-ee7ff789af92", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "destination": "96ebeadd-ec1b-47f7-9fe7-7387acd1ea75", 
+              "uuid": "d915935b-7bc7-481c-a533-a112077f53f2", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "wait_message", 
+          "label": "Suspected_Report", 
+          "operand": "@step.value", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 0, 
+          "x": 0, 
+          "config": {}
+        }
+      ], 
+      "metadata": {
+        "uuid": "b4e9e40b-c76c-49f7-8519-924d658ed323", 
+        "notes": [], 
+        "expires": 180, 
+        "name": "mHero eIDSR Case Alert Base", 
+        "saved_on": "2017-08-30T05:44:11.090062Z", 
+        "revision": 23
+      }
+    }, 
+    {
+      "base_language": "eng", 
+      "action_sets": [
+        {
+          "y": 1633, 
+          "x": 540, 
+          "destination": null, 
+          "uuid": "3c041510-630f-49f6-827f-dae586948c08", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Thank you for submitting this case alert for @extra.disease_name ! Your DSO and CSO will also receive a notification."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 445, 
+          "x": 16, 
+          "destination": "f1c627ba-5114-4095-b5c1-246e5b9813a7", 
+          "uuid": "075d269b-3a58-4584-9c08-972db5d499c4", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "@extra.disease_name  requires that a specimen is collected. Did you  collect specimen for this case? Reply with either Yes or No"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 1109, 
+          "x": 486, 
+          "destination": "f1b13fb4-92b3-42a8-b108-ddf8e3626213", 
+          "uuid": "6678b8a4-47c8-4953-9165-e9776d5b5e5d", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Was this disease detected in a community? Please answer either Yes, No or don't know."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 1443, 
+          "x": 732, 
+          "destination": "f1b13fb4-92b3-42a8-b108-ddf8e3626213", 
+          "uuid": "9d2ca8cd-213a-44c2-8aea-258e02a47e71", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "We do not understand your response. Was the disease detected in a community? Please answer yes, no or don't know."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 821, 
+          "x": 1102, 
+          "destination": "b14908b3-df30-4c7a-9a1e-a74af4aefadc", 
+          "uuid": "5ebf6a29-3c24-4d59-a2dc-926caef48f8e", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "We do not understand your response. Did the patient travel out of the country in the last month? Please answer yes, no or don't know."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 216, 
+          "x": 1110, 
+          "destination": "b14908b3-df30-4c7a-9a1e-a74af4aefadc", 
+          "uuid": "7e26a673-d902-4e63-84dc-e50f9cac335e", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Has the patient traveled out of the country in the last one month? Please answer with yes, no or don't know."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 886, 
+          "x": 354, 
+          "destination": "f1c627ba-5114-4095-b5c1-246e5b9813a7", 
+          "uuid": "cc099899-c5f2-42f8-affa-6e4e2e6fcb44", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "We do not understand your response,Answer Yes if Specimen was collected or No if No specimen was collected."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 570, 
+          "x": 261, 
+          "destination": "7e26a673-d902-4e63-84dc-e50f9cac335e", 
+          "uuid": "35fab800-73fd-4314-81b9-bcb60e2853e1", 
+          "actions": [
+            {
+              "action": "GET", 
+              "type": "api", 
+              "webhook": "http://username:password@52.18.125.4:5001/eidsrAlert?category=update&trackerid=@extra.trackerid&specimen_collected=@flow.sample_collected.category&reporter_globalid=@contact.globalid", 
+              "webhook_headers": []
+            }
+          ]
+        }, 
+        {
+          "y": 1217, 
+          "x": 1046, 
+          "destination": "e60899aa-ab8b-4638-9e58-df80688eb817", 
+          "uuid": "b5b20cf0-350c-481c-9daf-ba2d17646ef3", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "@extra.disease_name Requires that a specimen is collected,Can you tell us the reason as to why a specimen was not collected?"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 908, 
+          "x": 0, 
+          "destination": "b5b20cf0-350c-481c-9daf-ba2d17646ef3", 
+          "uuid": "aa145f41-7ef2-4de0-a84f-9653598fa94c", 
+          "actions": [
+            {
+              "action": "GET", 
+              "type": "api", 
+              "webhook": "http://username:password@52.18.125.4:5001/eidsrAlert?category=update&trackerid=@extra.trackerid&specimen_collected=@flow.sample_collected.category&reporter_globalid=@contact.globalid", 
+              "webhook_headers": []
+            }
+          ]
+        }, 
+        {
+          "y": 1627, 
+          "x": 1183, 
+          "destination": "7e26a673-d902-4e63-84dc-e50f9cac335e", 
+          "uuid": "21b543ba-faf8-42ee-b8e7-f24edf37cdc8", 
+          "actions": [
+            {
+              "action": "POST", 
+              "type": "api", 
+              "webhook": "http://username:password@52.18.125.4:5001/eidsrAlert?category=update&trackerid=@extra.trackerid&reason_no_specimen=@flow.reason_specimen_not_collected.text&reporter_globalid=@contact.globalid", 
+              "webhook_headers": []
+            }
+          ]
+        }, 
+        {
+          "y": 939, 
+          "x": 725, 
+          "destination": "6678b8a4-47c8-4953-9165-e9776d5b5e5d", 
+          "uuid": "c41af309-e57d-44b9-b01b-6393c8ef563c", 
+          "actions": [
+            {
+              "action": "POST", 
+              "type": "api", 
+              "webhook": "http://username:password@52.18.125.4:5001/eidsrAlert?category=update&trackerid=@extra.trackerid&international_travel=@flow.international_travel.category&reporter_globalid=@contact.globalid", 
+              "webhook_headers": []
+            }
+          ]
+        }, 
+        {
+          "y": 1555, 
+          "x": 246, 
+          "destination": "3c041510-630f-49f6-827f-dae586948c08", 
+          "uuid": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+          "actions": [
+            {
+              "action": "POST", 
+              "type": "api", 
+              "webhook": "http://username:password@52.18.125.4:5001/eidsrAlert?category=update&trackerid=@extra.trackerid&community_detection=@flow.community_detection.category&reporter_globalid=@contact.globalid", 
+              "webhook_headers": []
+            }
+          ]
+        }, 
+        {
+          "y": 0, 
+          "x": 779, 
+          "destination": "7bf2fba1-8748-4843-ac48-c95304705ab7", 
+          "uuid": "d1249806-01dd-4fc7-9cd8-e575b04c02c1", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "You have just reported a suspected case of @extra.disease_name .The idsrid for this case is @extra.idsrid. Use this idsrid to label samples"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }
+      ], 
+      "version": 10, 
+      "flow_type": "F", 
+      "entry": "d1249806-01dd-4fc7-9cd8-e575b04c02c1", 
+      "rule_sets": [
+        {
+          "uuid": "b14908b3-df30-4c7a-9a1e-a74af4aefadc", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "Yes"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "c41af309-e57d-44b9-b01b-6393c8ef563c", 
+              "uuid": "61b5d2ab-3061-491c-ab12-b1ee9aae1322", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "y"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "c41af309-e57d-44b9-b01b-6393c8ef563c", 
+              "uuid": "a9f70f7d-3cc9-4a08-8f06-cf16b6d441da", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "ye"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "c41af309-e57d-44b9-b01b-6393c8ef563c", 
+              "uuid": "0303c12e-fabd-4e53-9814-6a5055e0e57d", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "no"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "No"
+              }, 
+              "destination": "c41af309-e57d-44b9-b01b-6393c8ef563c", 
+              "uuid": "184086c7-1c9a-4998-bdcb-e7ceb904ed4a", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "N"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "No"
+              }, 
+              "destination": "c41af309-e57d-44b9-b01b-6393c8ef563c", 
+              "uuid": "34efa9b1-b634-4908-8ab8-645b52ec4d02", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "don't know"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "c41af309-e57d-44b9-b01b-6393c8ef563c", 
+              "uuid": "b6a6fab9-d284-4321-a001-0e75cacbad86", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "dont know"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "c41af309-e57d-44b9-b01b-6393c8ef563c", 
+              "uuid": "e4826964-77ab-4cfc-b56b-9a17348b99d7", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "i don't know"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "c41af309-e57d-44b9-b01b-6393c8ef563c", 
+              "uuid": "b668d936-2782-4521-a822-95d7d2ef92c7", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "destination": "5ebf6a29-3c24-4d59-a2dc-926caef48f8e", 
+              "uuid": "8e14e33a-cca0-4e59-a1df-e40fcdec95a7", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "wait_message", 
+          "label": "International_Travel", 
+          "operand": "@step.value", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 771, 
+          "x": 601, 
+          "config": {}
+        }, 
+        {
+          "uuid": "1f6a98c2-e4bc-40e7-9b86-07852bd20db2", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "Lassa Fever"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Lassa Fever"
+              }, 
+              "destination": "075d269b-3a58-4584-9c08-972db5d499c4", 
+              "uuid": "249f24e7-3eaa-464a-b80d-25fc7b58b354", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "VHF (EVD)"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "VHF (EVD)"
+              }, 
+              "destination": "075d269b-3a58-4584-9c08-972db5d499c4", 
+              "uuid": "bd25b48e-bfbe-4e64-80ed-ca7817060c94", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Yellow Fever"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Yellow Fever"
+              }, 
+              "destination": "075d269b-3a58-4584-9c08-972db5d499c4", 
+              "uuid": "631a8846-5803-47fb-9b98-5c7fcc43b035", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Meningitis"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Meningitis"
+              }, 
+              "destination": "075d269b-3a58-4584-9c08-972db5d499c4", 
+              "uuid": "960db0a3-cfd1-4e47-9a6b-5b0d5465dc28", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Acute Flacid Paralysis (AFP)"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Acute Flacid Paralysis (AFP)"
+              }, 
+              "destination": "075d269b-3a58-4584-9c08-972db5d499c4", 
+              "uuid": "b2498dfb-3ce1-4ee4-989e-bdeff6f09daa", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Human Rabies"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Human Rabies"
+              }, 
+              "destination": "075d269b-3a58-4584-9c08-972db5d499c4", 
+              "uuid": "1d38a91e-582d-46a6-896c-959775baefa4", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "destination": "7e26a673-d902-4e63-84dc-e50f9cac335e", 
+              "uuid": "ffc20efe-3d1e-405a-832c-2395ade5e1a3", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "expression", 
+          "label": "Response 4", 
+          "operand": "@extra.disease", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 323, 
+          "x": 163, 
+          "config": {}
+        }, 
+        {
+          "uuid": "f1b13fb4-92b3-42a8-b108-ddf8e3626213", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "yes"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "2006d643-72f1-4fb1-8140-2b29a17af5ec", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "ye"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "421458ea-8a8f-4acf-91c3-e2c23381c616", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "y"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "d70fccf0-16d1-4997-aad7-73db5208f28b", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "no"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "No"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "85db7480-2135-4cb5-bbbe-174b0eb70ebc", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "n"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "No"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "9ec91172-889c-4a5d-b124-78f2bc31f6aa", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "not sure"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "b69d9c70-6ec5-4553-9f1a-a581003b1905", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "ns"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "ac06c119-e522-4865-90f2-865447172f94", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "I don't know"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "6cd9d7b2-9e6a-4b88-82e0-7a3197c2c5ec", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "dont know"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "09ff697f-918f-4b73-97fb-a1ad7438c0a6", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "I dont know"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "81f73f28-c08c-4c9f-b22f-637cc428a18d", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "don't know"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Unknown"
+              }, 
+              "destination": "a43e1c17-16ce-4fc6-9602-60826f9f9642", 
+              "uuid": "3ed2aa2b-f224-46eb-b61a-7775fa22e185", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "destination": "9d2ca8cd-213a-44c2-8aea-258e02a47e71", 
+              "uuid": "b8c5a0a1-f925-402d-97a3-3632ad82bd2b", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "wait_message", 
+          "label": "Community_Detection", 
+          "operand": "@step.value", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 1374, 
+          "x": 305, 
+          "config": {}
+        }, 
+        {
+          "uuid": "7bf2fba1-8748-4843-ac48-c95304705ab7", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "Yes"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "7e26a673-d902-4e63-84dc-e50f9cac335e", 
+              "uuid": "fefa4a3d-da1a-4285-9e8e-2aa551dee424", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "No"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "No"
+              }, 
+              "destination": "1f6a98c2-e4bc-40e7-9b86-07852bd20db2", 
+              "uuid": "ee7edaac-dc5f-4a0e-88a6-163b46d18696", 
+              "destination_type": "R"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "destination": "1f6a98c2-e4bc-40e7-9b86-07852bd20db2", 
+              "uuid": "afd246a1-d9be-44d6-a34d-cb186ef2965b", 
+              "destination_type": "R"
+            }
+          ], 
+          "ruleset_type": "expression", 
+          "label": "Response 7", 
+          "operand": "@extra.specimenCollected", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 127, 
+          "x": 475, 
+          "config": {}
+        }, 
+        {
+          "uuid": "f1c627ba-5114-4095-b5c1-246e5b9813a7", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "Yes"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "35fab800-73fd-4314-81b9-bcb60e2853e1", 
+              "uuid": "19c02bdd-058b-4cfb-b3ec-1df18e4e7830", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Ye"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "35fab800-73fd-4314-81b9-bcb60e2853e1", 
+              "uuid": "6e478b81-8598-4112-9cda-c7ae4c14dfec", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "Y"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Yes"
+              }, 
+              "destination": "35fab800-73fd-4314-81b9-bcb60e2853e1", 
+              "uuid": "f3ee2189-3f43-4256-be0a-934e11d047f0", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "No"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "No"
+              }, 
+              "destination": "aa145f41-7ef2-4de0-a84f-9653598fa94c", 
+              "uuid": "b18a399f-5d38-476d-92b3-b827f0a6b381", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "N"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "No"
+              }, 
+              "destination": "aa145f41-7ef2-4de0-a84f-9653598fa94c", 
+              "uuid": "2fadb2fd-5d73-4726-8a17-3eb4d28b0004", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "destination": "cc099899-c5f2-42f8-affa-6e4e2e6fcb44", 
+              "uuid": "9a6c5a0a-af6c-4113-a8b4-2d794637746c", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "wait_message", 
+          "label": "Sample_Collected", 
+          "operand": "@step.value", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 771, 
+          "x": 0, 
+          "config": {}
+        }, 
+        {
+          "uuid": "e60899aa-ab8b-4638-9e58-df80688eb817", 
+          "rules": [
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "All Responses"
+              }, 
+              "destination": "21b543ba-faf8-42ee-b8e7-f24edf37cdc8", 
+              "uuid": "7485a438-1645-417f-b2de-1acad40563d6", 
+              "destination_type": "A"
+            }
+          ], 
+          "ruleset_type": "wait_message", 
+          "label": "Reason_Specimen_Not_Collected", 
+          "operand": "@step.value", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 1435, 
+          "x": 1023, 
+          "config": {}
+        }
+      ], 
+      "metadata": {
+        "uuid": "a3ad7cf4-f07e-46bf-925e-e0d9441ad4ee", 
+        "notes": [], 
+        "expires": 10080, 
+        "name": "mHero eIDSR Case Alert", 
+        "saved_on": "2017-08-30T05:49:00.339091Z", 
+        "revision": 404
+      }
+    }, 
+    {
+      "base_language": "eng", 
+      "action_sets": [
+        {
+          "y": 192, 
+          "x": 328, 
+          "destination": null, 
+          "uuid": "c78d41af-67d7-4cf6-9d69-941ccf66dffd", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Sample(s) @extra.samples Accepted for Pickup. Send an alert at the time you deliver samples to the lab in the format delivered.sample-id1.sample-id2.sample-id3.lab name"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 76, 
+          "x": 1030, 
+          "destination": null, 
+          "uuid": "995647d2-d7f0-4590-8957-b9c89c5bfa76", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Sample(s) with ID @extra.samples were not found on the system,please check and resend."
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }, 
+        {
+          "y": 247, 
+          "x": 700, 
+          "destination": null, 
+          "uuid": "ab65ed61-e5cd-4ca6-ab95-fb1a26202865", 
+          "actions": [
+            {
+              "msg": {
+                "eng": "Your message was not processed,please send message in the format\npicked.sample-id1.sample-id2.lab name\nwhere sample-id1,2 are the IDs of samples picked"
+              }, 
+              "media": {}, 
+              "send_all": false, 
+              "type": "reply"
+            }
+          ]
+        }
+      ], 
+      "version": 10, 
+      "flow_type": "F", 
+      "entry": "70443fc8-9276-4e63-b1ee-01cec88aaf8e", 
+      "rule_sets": [
+        {
+          "uuid": "70443fc8-9276-4e63-b1ee-01cec88aaf8e", 
+          "rules": [
+            {
+              "test": {
+                "test": {
+                  "eng": "success"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Success"
+              }, 
+              "destination": "c78d41af-67d7-4cf6-9d69-941ccf66dffd", 
+              "uuid": "f515b758-4df3-438d-9dbd-16d8bbd27afa", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "incomplete"
+                }, 
+                "type": "contains"
+              }, 
+              "category": {
+                "eng": "Incomplete"
+              }, 
+              "destination": "ab65ed61-e5cd-4ca6-ab95-fb1a26202865", 
+              "uuid": "30a7d467-e0d1-4d39-acb5-fe3728a9a63b", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": {
+                  "eng": "not_found"
+                }, 
+                "type": "contains_any"
+              }, 
+              "category": {
+                "eng": "Not_found"
+              }, 
+              "destination": "995647d2-d7f0-4590-8957-b9c89c5bfa76", 
+              "uuid": "152f8817-d88f-43c4-8b16-16f36845f07a", 
+              "destination_type": "A"
+            }, 
+            {
+              "test": {
+                "test": "true", 
+                "type": "true"
+              }, 
+              "category": {
+                "eng": "Other"
+              }, 
+              "uuid": "bfe59415-6bbb-4753-9b6f-4e4b3ff4536c"
+            }
+          ], 
+          "ruleset_type": "expression", 
+          "label": "response", 
+          "operand": "@extra.status", 
+          "finished_key": null, 
+          "response_type": "", 
+          "y": 0, 
+          "x": 544, 
+          "config": {}
+        }
+      ], 
+      "metadata": {
+        "expires": 10080, 
+        "saved_on": "2017-08-30T04:14:59.772515Z", 
+        "uuid": "90b9c70e-1b2f-4815-a704-14e01c307655", 
+        "name": "mHero eIDSR Sample Picked", 
+        "revision": 38
+      }
+    }, 
+    {
+      "base_language": "eng", 
+      "action_sets": [
+        {
+          "y": 0, 
+          "x": 579, 
+          "destination": null, 
+          "uuid": "7894f896-a636-46db-88fd-31645309741c", 
+          "actions": [
+            {
+              "action": "GET", 
+              "type": "api", 
+              "webhook": "http://username:password@52.18.125.4:5001/eidsrAlert?category=query&query_type=provider_facility&reporter_globalid=@contact.globalid", 
+              "webhook_headers": []
+            }
+          ]
+        }
+      ], 
+      "version": 10, 
+      "flow_type": "F", 
+      "entry": "7894f896-a636-46db-88fd-31645309741c", 
+      "rule_sets": [], 
+      "metadata": {
+        "expires": 10080, 
+        "saved_on": "2017-08-30T05:40:47.902344Z", 
+        "uuid": "b29d8c5e-dc4b-4bc2-b837-3d44b3499d09", 
+        "name": "mHero eIDSR Request Rider Pickup Relay Facility Base", 
+        "revision": 62
+      }
+    }
+  ], 
+  "triggers": [
+    {
+      "trigger_type": "K", 
+      "flow": {
+        "name": "mHero eIDSR Case Alert Base", 
+        "uuid": "b4e9e40b-c76c-49f7-8519-924d658ed323"
+      }, 
+      "groups": [], 
+      "keyword": "alert", 
+      "channel": null
+    }, 
+    {
+      "trigger_type": "K", 
+      "flow": {
+        "name": "mHero eIDSR Sample Delivered Base", 
+        "uuid": "32041105-36cb-4940-9a63-c6880976d274"
+      }, 
+      "groups": [
+        {
+          "name": "Riders Dispatch Testing", 
+          "uuid": "3460f683-61c5-47d3-86db-3721ae166e7c"
+        }, 
+        {
+          "name": "Riders Dispatch", 
+          "uuid": "17ce58b8-dd18-46b9-a2ca-b275ae886e48"
+        }
+      ], 
+      "keyword": "delivered", 
+      "channel": null
+    }, 
+    {
+      "trigger_type": "K", 
+      "flow": {
+        "name": "mHero eIDSR Request Rider Pickup Relay Facility Base", 
+        "uuid": "b29d8c5e-dc4b-4bc2-b837-3d44b3499d09"
+      }, 
+      "groups": [], 
+      "keyword": "pickup", 
+      "channel": null
+    }, 
+    {
+      "trigger_type": "K", 
+      "flow": {
+        "name": "mHero eIDSR Sample Picked Base", 
+        "uuid": "48291e6b-e8f9-48d4-8e82-71b76c8d0a8d"
+      }, 
+      "groups": [
+        {
+          "name": "Riders Dispatch Testing", 
+          "uuid": "3460f683-61c5-47d3-86db-3721ae166e7c"
+        }, 
+        {
+          "name": "Riders Dispatch", 
+          "uuid": "17ce58b8-dd18-46b9-a2ca-b275ae886e48"
+        }
+      ], 
+      "keyword": "picked", 
+      "channel": null
+    }
+  ]
+}
