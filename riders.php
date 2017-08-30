@@ -28,7 +28,6 @@ class riders extends eidsr_base {
     $samples = str_ireplace("delivered","",$samples);
     $samples = explode(".",$samples);
     $lab = "";
-
     if($action == "sample_delivered") {
       $lab = end($samples);
       $test_lab = explode("-",$lab);
@@ -40,6 +39,7 @@ class riders extends eidsr_base {
       }
       reset($samples);
     }
+    error_log(print_r($samples,true));
 
     if(count($samples) == 0){
       $extra = '"status":"incomplete"';
@@ -126,6 +126,17 @@ class riders extends eidsr_base {
       $extra = '"status":"success","samples":"'.$found_samples.'"';
       $this->start_flow($this->flow_uuid,"",array($this->reporter_rp_id),$extra);
     }
+
+    if(!$found_samples and !$missing_samples) {
+      $samples = str_ireplace("picked","",$this->samples);
+      $samples = str_ireplace("delivered","",$samples);
+      $samples = str_ireplace(".","",$samples);
+      $extra = '"status":"not_found","samples":"'.$samples.'"';
+      array_push($this->response_body,array("Riders ".$action=>"IDSRID ".$samples." Not Found On The System"));
+      $this->start_flow($this->flow_uuid,"",array($this->reporter_rp_id),$extra);
+      return false;
+    }
+
     if($missing_samples)
     return false;
     else

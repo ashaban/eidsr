@@ -182,22 +182,16 @@ class eidsr extends eidsr_base{
                   }';
     error_log($post_data);
     $response = $this->exec_request("Submitting Case Alert To Offline Tracker",$this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header,true);
-    error_log(print_r($response,true));
-    exit;
     list($header, $body) = explode("\r\n\r\n", $response, 2);
     if(count($header) == 0) {
       error_log("Something went wrong,sync server returned empty header");
+      $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
       array_push($this->response_body,array("Case Details"=>"Something went wrong,sync server returned empty header"));
     }
     if(count($body) == 0) {
       error_log("Something went wrong,sync server returned empty body");
+      $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
       array_push($this->response_body,array("Case Details"=>"Something went wrong,sync server returned empty body"));
-      return false;
-    }
-    if(stripos($header,400) !== false) {
-      //report this to openHIM
-      error_log($response);
-      array_push($this->response_body,array("Case Details"=>$body));
       return false;
     }
 
@@ -205,6 +199,21 @@ class eidsr extends eidsr_base{
     if(array_key_exists("message",$body) and strpos($body["message"],"The caseI id is already") !== false) {
       error_log("The caseID you submitted is already used,pleae resubmit this case with a different caseID");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"The caseID you submitted is already used,please resubmit this case with a different caseID");
+      array_push($this->response_body,array("Case Details"=>$body));
+      return false;
+    }
+    if(array_key_exists("message",$body) and strpos($body["message"],"Missing organisation unit (Facility) with code") !== false) {
+      error_log($body["message"]);
+      array_push($this->response_body,array("Case Details"=>$body));
+      $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"You are located in a facility that is not allowed to send case alerts");
+      return false;
+    }
+    if(stripos($header,400) !== false) {
+      //report this to openHIM
+      error_log($response);
+      $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
+      array_push($this->response_body,array("Case Details"=>"IDSRID was not returned by the sync server"));
+      array_push($this->response_body,array("Case Details"=>$body));
       return false;
     }
     $idsrid = strtoupper($body["caseInfo"]["idsrId"]);
