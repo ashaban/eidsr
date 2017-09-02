@@ -24,7 +24,9 @@ class riders extends eidsr_base {
   public function sample_action($action) {
     $reported_cases = file_get_contents("reported_cases.json");
     $reported_cases = json_decode($reported_cases,true);
+    $samples = str_ireplace("testpicked","",$this->samples);
     $samples = str_ireplace("picked","",$this->samples);
+    $samples = str_ireplace("testdelivered","",$samples);
     $samples = str_ireplace("delivered","",$samples);
     $samples = explode(".",$samples);
     $lab = "";
@@ -128,7 +130,9 @@ class riders extends eidsr_base {
     }
 
     if(!$found_samples and !$missing_samples) {
-      $samples = str_ireplace("picked","",$this->samples);
+      $samples = str_ireplace("testpicked","",$this->samples);
+      $samples = str_ireplace("picked","",$samples);
+      $samples = str_ireplace("testdelivered","",$samples);
       $samples = str_ireplace("delivered","",$samples);
       $samples = str_ireplace(".","",$samples);
       $extra = '"status":"not_found","samples":"'.$samples.'"';

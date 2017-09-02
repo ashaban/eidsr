@@ -59,20 +59,13 @@ class eidsr extends eidsr_base{
         </csd:requestParams>';
     $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
     $prov_entity = $this->exec_request("Getting Reporter Details",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    if($prov_entity == "") {
+      error_log("An error has ocured,Openinfoman has returned empty results");
+      return false;
+    }
     $fac_uuid = $this->extract($prov_entity,"/csd:provider/csd:facilities/csd:facility/@entityID",'providerDirectory',true);
     $fac_det = $this->get_facility_details ($fac_uuid,"uuid");
     return $fac_det;
-  }
-
-  public function get_dhis2_facility_uid($facility_uuid) {
-    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-          <csd:id entityID="'.$facility_uuid.'"/>
-          <csd:otherID position="2"/>
-        </csd:requestParams>';
-    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-hwr:stored-function:facility_read_otherid";
-    $fac_entity = $this->exec_request("Getting Facility Other Id",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    $dhis2_fac_uid = $this->extract($fac_entity,"/csd:facility/csd:otherID",'facilityDirectory',true);
-    return $dhis2_fac_uid;
   }
 
   public static function trim_values(&$value) {
@@ -168,7 +161,6 @@ class eidsr extends eidsr_base{
   }
 
   public function send_to_syncserver() {
-    $dhis2_facility_uid = $this->get_dhis2_facility_uid($this->facility_details["facility_uuid"]);
     $header = Array(
                     "Content-Type: application/json"
                    );
@@ -303,6 +295,8 @@ $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
 
 //require("test_config.php");
+//in case this is comming from test workflow
+$report = str_ireplace("testalert.","",$report);
 $report = str_ireplace("alert.","",$report);
 $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
                     $rapidpro_url,$case_alert_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,
