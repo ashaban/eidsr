@@ -22,8 +22,6 @@ class riders extends eidsr_base {
   }
 
   public function sample_action($action) {
-    $reported_cases = file_get_contents("reported_cases.json");
-    $reported_cases = json_decode($reported_cases,true);
     $samples = str_ireplace("testpicked","",$this->samples);
     $samples = str_ireplace("picked","",$this->samples);
     $samples = str_ireplace("testdelivered","",$samples);
@@ -57,62 +55,69 @@ class riders extends eidsr_base {
       $status = "picked";
     }
 
+    $reported_cases = (new MongoDB\Client)->eidsr->case_details;
     foreach($samples as $sample) {
       if($sample == "")
       continue;
-      $sample_found = false;
       $sample = strtoupper(trim($sample));
-      foreach ($reported_cases as $case) {
-        if(in_array($sample,$case)) {
-          $sample_found = true;
-          $cont_alert = array();
-          $facility_code = $case["facility_code"];
-          $disease_name = $case ["disease_name"];
+      $case = $reported_cases->findOne(['idsr_id' => $sample]);
+      if($case) {
+        if($action == "sample_picked")
+        $collection = (new MongoDB\Client)->eidsr->picked_samples;
+        else if($action == "sample_delivered")
+        $collection = (new MongoDB\Client)->eidsr->delivered_samples;
+        $insertOneResult = $collection->insertOne([
+                                                    "case_id"=>$case["_id"],
+                                                    "idsr_id"=>$case["idsr_id"],
+                                                    "reporter_rapidpro_id"=>$this->reporter_rp_id,
+                                                  ]);
+        $cont_alert = array();
+        $facility_code = $case["facility_code"];
+        $disease_name = $case ["disease_name"];
 
-          //store transactionId of this case
-          $this->openHimTransactionIDs[$sample] = $case["openHimTransactionID"];
-          $facility_details = $this->get_facility_details ($facility_code,"code");
+        //store transactionId of this case
+        $this->openHimTransactionIDs[$sample] = $case["openHimTransactionID"];
+        $facility_details = $this->get_facility_details ($facility_code,"code");
+        $msg = "Rider has ".$status." a sample of a Suspected case of ".$disease_name;
+        if($lab)
+        $msg .= " To ".$lab." Lab,";
+        $msg .= " Which was Reported From ".$facility_details["facility_name"].",".$facility_details["district_name"];
+
+        //alert DSO
+        $dso = $this->get_dso($facility_details["district_uuid"]);
+        $cont_alert = $this->get_rapidpro_id($dso);
+        $this->broadcast("Alert DSO",$cont_alert,$msg);
+
+        //alert CSO
+        $cso = $this->get_cso($facility_details["county_uuid"]);
+        $cont_alert = $this->get_rapidpro_id($cso);
+        $this->broadcast("Alert CSO",$cont_alert,$msg);
+
+        //alert others
+        $cont_alert = array();
+        foreach($this->notify_group as $group_name) {
+          $other_contacts = $this->get_contacts_in_grp(urlencode($group_name));
+          if(count($other_contacts)>0)
+          $cont_alert = array_merge($cont_alert,$other_contacts);
+        }
+        if(count($cont_alert) > 0)
+        $this->broadcast("Alert DPC And Others",$cont_alert,$msg);
+        //if delivered,alert HW
+        if($action == "sample_delivered") {
+          $cont_alert = $this->get_rapidpro_id(array($case["reporter_globalid"]));
           $msg = "Rider has ".$status." a sample of a Suspected case of ".$disease_name;
           if($lab)
           $msg .= " To ".$lab." Lab,";
-          $msg .= " Which was Reported From ".$facility_details["facility_name"].",".$facility_details["district_name"];
-
-          //alert DSO
-          $dso = $this->get_dso($facility_details["district_uuid"]);
-          $cont_alert = $this->get_rapidpro_id($dso);
-          $this->broadcast("Alert DSO",$cont_alert,$msg);
-
-          //alert CSO
-          $cso = $this->get_cso($facility_details["county_uuid"]);
-          $cont_alert = $this->get_rapidpro_id($cso);
-          $this->broadcast("Alert CSO",$cont_alert,$msg);
-
-          //alert others
-          $cont_alert = array();
-          foreach($this->notify_group as $group_name) {
-            $other_contacts = $this->get_contacts_in_grp(urlencode($group_name));
-            if(count($other_contacts)>0)
-            $cont_alert = array_merge($cont_alert,$other_contacts);
-          }
-          if(count($cont_alert) > 0)
-          $this->broadcast("Alert DPC And Others",$cont_alert,$msg);
-          //if delivered,alert HW
-          if($action == "sample_delivered") {
-            $cont_alert = $this->get_rapidpro_id(array($case["reporter_globalid"]));
-            $msg = "Rider has ".$status." a sample of a Suspected case of ".$disease_name;
-            if($lab)
-            $msg .= " To ".$lab." Lab,";
-            $msg .= " Which was Reported From your facility (".$facility_details["facility_name"].",".$facility_details["district_name"].")";
-            $this->broadcast("Alert Person Reported Case",$cont_alert,$msg);
-          }
-          if(!$found_samples)
-          $found_samples = $sample;
-          else
-          $found_samples .= ",".$sample;
-          break;
+          $msg .= " Which was Reported From your facility (".$facility_details["facility_name"].",".$facility_details["district_name"].")";
+          $this->broadcast("Alert Person Reported Case",$cont_alert,$msg);
         }
+        if(!$found_samples)
+        $found_samples = $sample;
+        else
+        $found_samples .= ",".$sample;
+        break;
       }
-      if(!$sample_found) {
+      else {
         if(!$missing_samples)
         $missing_samples = $sample;
         else
@@ -168,6 +173,7 @@ session_write_close();
 //end of closing the connection,now start processing the request and start a separate flow
 require("config.php");
 require("openHimConfig.php");
+require_once __DIR__ . "/vendor/autoload.php";
 $category = $_REQUEST["category"];
 $samples = $_REQUEST["samples"];
 $reporter_rp_id = $_REQUEST["reporter_rp_id"];

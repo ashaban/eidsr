@@ -175,12 +175,13 @@ class eidsr extends eidsr_base{
     error_log($post_data);
     $response = $this->exec_request("Submitting Case Alert To Offline Tracker",$this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$post_data,$header,true);
     list($header, $body) = explode("\r\n\r\n", $response, 2);
-    if(count($header) == 0) {
+    error_log($response);
+    if(count($header) == 0 or $header == "") {
       error_log("Something went wrong,sync server returned empty header");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
       array_push($this->response_body,array("Case Details"=>"Something went wrong,sync server returned empty header"));
     }
-    if(count($body) == 0) {
+    if(count($body) == 0 or $body == "") {
       error_log("Something went wrong,sync server returned empty body");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
       array_push($this->response_body,array("Case Details"=>"Something went wrong,sync server returned empty body"));
@@ -194,12 +195,27 @@ class eidsr extends eidsr_base{
       array_push($this->response_body,array("Case Details"=>$body));
       return false;
     }
+    //above if statement will be replaced with this else statement after offline tracker codes that are in dev get deployed to production
+    else if(array_key_exists("error",$body) and $body["error"] == "Duplicate caseid") {
+      error_log("The caseID you submitted is already used,pleae resubmit this case with a different caseID");
+      $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"The caseID you submitted is already used,please resubmit this case with a different caseID");
+      array_push($this->response_body,array("Case Details"=>$body));
+      return false;
+    }
     if(array_key_exists("message",$body) and strpos($body["message"],"Missing organisation unit (Facility) with code") !== false) {
       error_log($body["message"]);
       array_push($this->response_body,array("Case Details"=>$body));
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"You are located in a facility that is not allowed to send case alerts");
       return false;
     }
+    //above if statement will be replaced with this else statement after offline tracker codes that are in dev get deployed to production
+    else if(array_key_exists("error",$body) and strpos($body["error"],"Missing organisation unit") !== false) {
+      error_log($body["error"]);
+      array_push($this->response_body,array("Case Details"=>$body));
+      $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"You are located in a facility that is not allowed to send case alerts");
+      return false;
+    }
+
     if(stripos($header,400) !== false) {
       //report this to openHIM
       error_log($response);
@@ -216,19 +232,17 @@ class eidsr extends eidsr_base{
       return false;
     }
 
-    $reported_cases = file_get_contents("reported_cases.json");
-    $reported_cases = json_decode($reported_cases,true);
-    $total_cases = count($reported_cases);
-    $reported_cases[$total_cases] = array("disease_name"=>$this->reported_disease,
-                                          "idsr_id"=>$idsrid,
-                                          "reporter_globalid"=>$this->reporter_globalid,
-                                          "facility_code"=>$this->facility_details["facility_code"],
-                                          "openHimTransactionID"=>$this->openHimTransactionID
-                                         );
-    //report this to openHIM
-    array_push($this->response_body,array("Case Details"=>$reported_cases[$total_cases]));
-    $reported_cases = json_encode($reported_cases,true);
-    file_put_contents("reported_cases.json",$reported_cases);
+    $collection = (new MongoDB\Client)->eidsr->case_details;
+    $insertOneResult = $collection->insertOne([
+                                                "disease_name"=>$this->reported_disease,
+                                                "idsr_id"=>$idsrid,
+                                                "reporter_globalid"=>$this->reporter_globalid,
+                                                "reporter_rapidpro_id"=>$this->reporter_rp_id,
+                                                "facility_code"=>$this->facility_details["facility_code"],
+                                                "openHimTransactionID"=>$this->openHimTransactionID
+                                              ]);
+    error_log("case details saved to database with id ".$insertOneResult->getInsertedId());
+
     $header = explode("\r\n",$header);
     foreach($header as $resp) {
       if(substr($resp,0,8) == "Location") {
@@ -284,6 +298,7 @@ session_write_close();
 
 require("config.php");
 require("openHimConfig.php");
+require_once __DIR__ . "/vendor/autoload.php";
 
 //$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77985','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:c8125cb3-3bb6-3676-835d-7bc3290add6f');
 $category = $_REQUEST["category"];
