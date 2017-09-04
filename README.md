@@ -1,4 +1,4 @@
-# eidsr
+# eidsr Install Instructions
 Install Mongo DB via pecl<br>
 ```
 sudo pecl install mongodb
