@@ -1,5 +1,5 @@
 # eidsr Install Instructions
-You will need to install openHIM core and console. Install instructions are available on below link.
+You will need to install openHIM core and console and mongo DB using below commands
 ```
 sudo add-apt-repository ppa:openhie/release
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
