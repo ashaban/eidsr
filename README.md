@@ -1,5 +1,5 @@
 # eidsr Install Instructions
-Install Mongo DB via pecl<br>
+Install Mongo DB via pecl
 ```
 sudo pecl install mongodb
 ```
@@ -23,6 +23,6 @@ sudo service apache2 restart
 We will now need to install php mongodb library using below commands
 ```
 sudo apt-get install curl php5-cli git
-curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer<br>
+curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
 composer require mongodb/mongodb
 ```
