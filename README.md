@@ -25,7 +25,7 @@ It should look like this:
 ```
 extension=mongodb.so
 ```
-We'll also need to enable this for Apache and CLI by creating 2 symlinks for the uuid file:
+We'll also need to enable this for Apache and CLI by creating 2 symlinks for the mongodb file:
 ```
 sudo ln -s /etc/php5/mods-available/mongodb.ini /etc/php5/apache2/conf.d/20-mongodb.ini
 sudo ln -s /etc/php5/mods-available/mongodb.ini /etc/php5/cli/conf.d/20-mongodb.ini
