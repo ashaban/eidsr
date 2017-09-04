@@ -13,7 +13,7 @@ git clone https://github.com/ashaban/eidsr.git
 ```
 Change variables in config.php and openHimConfig.php to meet your environments settings <br>
 
-Install Mongo DB via pecl
+Install Mongo DB php extension via pecl
 ```
 sudo pecl install mongodb
 ```
