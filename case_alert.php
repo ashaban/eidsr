@@ -114,7 +114,7 @@ class eidsr extends eidsr_base{
     //alert all partners
     if(count($cont_alert) > 0) {
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.".";
-      if($this->specimen)
+      if($this->specimen == "Yes")
       $msg .= "A sample was also taken for Riders to pick";
       $this->broadcast("Alert DPC And Others",$cont_alert,$msg);
     }
@@ -124,7 +124,7 @@ class eidsr extends eidsr_base{
     $cont_alert = $this->get_rapidpro_id($cso);
     if(count($cont_alert) > 0) {
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.". Please verify with DSO";
-      if($this->specimen)
+      if($this->specimen == "Yes")
       $msg .= ".A sample was also taken for Riders to pick";
       $this->broadcast("Alert CSO",$cont_alert,$msg);
     }
@@ -134,7 +134,7 @@ class eidsr extends eidsr_base{
     $cont_alert = $this->get_rapidpro_id($dso);
     if(count($cont_alert) > 0) {
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") With IDSRID ".$idsrid." By ".$this->reporter_name."(".$this->reporter_phone."). Please call or visit health facility to verify";
-      if($this->specimen)
+      if($this->specimen == "Yes")
       $msg .= ".A sample was also taken for Riders to pick";
       $this->broadcast("Alert DSO",$cont_alert,$msg);
     }
@@ -144,13 +144,13 @@ class eidsr extends eidsr_base{
     $cont_alert = $this->get_rapidpro_id($cdo);
     if(count($cont_alert) > 0) {
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].")";
-      if($this->specimen)
+      if($this->specimen == "Yes")
       $msg .= ".A sample was also taken for Riders to pick";
       $this->broadcast("Alert CDO",$cont_alert,$msg);
     }
 
     //if sample collected then alert Riders dispatch
-    if($this->specimen) {
+    if($this->specimen == "Yes") {
       $riders_contacts = $this->get_contacts_in_grp(urlencode("Riders Dispatch"));
       if(count($riders_contacts) > 0) {
         $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") With IDSRID ".$idsrid.". Sample is available at this facility for you to pick";
