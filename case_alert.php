@@ -116,6 +116,10 @@ class eidsr extends eidsr_base{
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.".";
       if($this->specimen == "Yes")
       $msg .= "A sample was also taken for Riders to pick";
+      else if($this->specimen == "No")
+      $msg .= "Sample was not collected";
+      else
+      $msg .= "Sample collection was not specified";
       $this->broadcast("Alert DPC And Others",$cont_alert,$msg);
     }
 
@@ -126,6 +130,10 @@ class eidsr extends eidsr_base{
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") By ".$this->reporter_name.". Please verify with DSO";
       if($this->specimen == "Yes")
       $msg .= ".A sample was also taken for Riders to pick";
+      else if($this->specimen == "No")
+      $msg .= ".Sample was not collected";
+      else
+      $msg .= ".Sample collection was not specified";
       $this->broadcast("Alert CSO",$cont_alert,$msg);
     }
 
@@ -136,6 +144,10 @@ class eidsr extends eidsr_base{
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") With IDSRID ".$idsrid." By ".$this->reporter_name."(".$this->reporter_phone."). Please call or visit health facility to verify";
       if($this->specimen == "Yes")
       $msg .= ".A sample was also taken for Riders to pick";
+      else if($this->specimen == "No")
+      $msg .= ".Sample was not collected";
+      else
+      $msg .= ".Sample collection was not specified";
       $this->broadcast("Alert DSO",$cont_alert,$msg);
     }
 
@@ -146,12 +158,16 @@ class eidsr extends eidsr_base{
       $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].")";
       if($this->specimen == "Yes")
       $msg .= ".A sample was also taken for Riders to pick";
+      else if($this->specimen == "No")
+      $msg .= ".Sample was not collected";
+      else
+      $msg .= ".Sample collection was not specified";
       $this->broadcast("Alert CDO",$cont_alert,$msg);
     }
 
     //if sample collected then alert Riders dispatch
     if($this->specimen == "Yes") {
-      $riders_contacts = $this->get_contacts_in_grp(urlencode("Riders Dispatch"));
+      $riders_contacts = $this->get_contacts_in_grp(urlencode($this->riders_group));
       if(count($riders_contacts) > 0) {
         $msg = "A suspected case of ".$this->reported_disease." Has been Reported From ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") With IDSRID ".$idsrid.". Sample is available at this facility for you to pick";
         $this->broadcast("Alert Riders",$riders_contacts,$msg);
@@ -232,17 +248,6 @@ class eidsr extends eidsr_base{
       return false;
     }
 
-    $collection = (new MongoDB\Client)->eidsr->case_details;
-    $insertOneResult = $collection->insertOne([
-                                                "disease_name"=>$this->reported_disease,
-                                                "idsr_id"=>$idsrid,
-                                                "reporter_globalid"=>$this->reporter_globalid,
-                                                "reporter_rapidpro_id"=>$this->reporter_rp_id,
-                                                "facility_code"=>$this->facility_details["facility_code"],
-                                                "openHimTransactionID"=>$this->openHimTransactionID
-                                              ]);
-    error_log("case details saved to database with id ".$insertOneResult->getInsertedId());
-
     $header = explode("\r\n",$header);
     foreach($header as $resp) {
       if(substr($resp,0,8) == "Location") {
@@ -252,6 +257,22 @@ class eidsr extends eidsr_base{
     }
     $sync_server_results = array("trackerid"=>$trackerid,"idsrid"=>$idsrid);
     error_log(print_r($sync_server_results,true));
+
+    $collection = (new MongoDB\Client)->eidsr->case_details;
+    $insertOneResult = $collection->insertOne([
+                                                "disease_name"=>$this->reported_disease,
+                                                "idsr_id"=>$idsrid,
+                                                "trackerid"=>$trackerid,
+                                                "reporter_globalid"=>$this->reporter_globalid,
+                                                "reporter_rapidpro_id"=>$this->reporter_rp_id,
+                                                "facility_code"=>$this->facility_details["facility_code"],
+                                                "facility_name"=>$this->facility_details["facility_name"],
+                                                "district_name"=>$this->facility_details["district_name"],
+                                                "county_name"=>$this->facility_details["county_name"],
+                                                "openHimTransactionID"=>$this->openHimTransactionID
+                                              ]);
+    error_log("case details saved to database with id ".$insertOneResult->getInsertedId());
+
     return $sync_server_results;
   }
 
@@ -326,7 +347,8 @@ if($eidsr->facility_details["facility_uuid"] == "") {
 }
 
 if($category == "alert_all") {
-  $eidsr->notify_group = array("DPC Group","National Reference Lab");
+  $eidsr->notify_group = $notify_group;
+  $eidsr->riders_group = $riders_group;
   $valid = $eidsr->validate_report();
   if($valid) {
     $sync_server_results = $eidsr->send_to_syncserver();
@@ -354,6 +376,16 @@ if($category == "update") {
   $eidsr->specimen_collected = $_REQUEST["specimen_collected"];
   $eidsr->reason_no_specimen = $_REQUEST["reason_no_specimen"];
   $eidsr->trackerid = $_REQUEST["trackerid"];
+  //just in case the reporter forgot to specify whether specimen was collected or not,during the initial alert
+  if($eidsr->specimen_collected == "Yes") {
+    $riders_contacts = $eidsr->get_contacts_in_grp(urlencode($riders_group));
+    if(count($riders_contacts) > 0) {
+      $reported_cases = (new MongoDB\Client)->eidsr->case_details;
+      $case = $reported_cases->findOne(['trackerid' => $eidsr->trackerid]);
+      $msg = "A suspected case of ".$case["disease_name"]." Has been Reported From ".$case["facility_name"]."(".$case["district_name"].",".$case["county_name"].") With IDSRID ".$case["idsr_id"].". Sample is available at this facility for you to pick";
+      $eidsr->broadcast("Alert Riders",$riders_contacts,$msg);
+    }
+  }
   $eidsr->update_syncserver();
   $eidsr->updateTransaction($openHimTransactionID,$eidsr->transaction_status,$eidsr->response_body,200,$eidsr->orchestrations);
 }
