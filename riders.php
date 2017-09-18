@@ -23,7 +23,7 @@ class riders extends eidsr_base {
 
   public function sample_action($action) {
     $samples = str_ireplace("testpicked","",$this->samples);
-    $samples = str_ireplace("picked","",$this->samples);
+    $samples = str_ireplace("picked","",$samples);
     $samples = str_ireplace("testdelivered","",$samples);
     $samples = str_ireplace("delivered","",$samples);
     $samples = explode(".",$samples);

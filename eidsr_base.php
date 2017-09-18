@@ -19,7 +19,7 @@ class eidsr_base extends openHimUtilities {
   public function get_facility_details ($facility_identifier,$type) {
     if($type == "code") {
       $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-             <csd:otherID code="code" assigningAuthorityName="http://localhost/ihris-manage-site">'.
+             <csd:otherID code="code" assigningAuthorityName="ihris.moh.gov.lr">'.
               $facility_identifier.
              '</csd:otherID>
             </csd:requestParams>';
@@ -389,7 +389,7 @@ class eidsr_base extends openHimUtilities {
       curl_setopt($curl, CURLOPT_USERPWD, $user.":".$password);
     $curl_out = curl_exec($curl);
     if ($err = curl_errno($curl) ) {
-      error_log($err. $url);
+      error_log("An error occured while accessing url ".$url .". CURL error number ".$err);
       return false;
     }
 

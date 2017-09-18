@@ -140,26 +140,4 @@ class openHimUtilities{
       return $orchestration;
   }
 }
-/*
-include("openHimConfig.php");
-$obj = new openHimUtilities($ohimApiHost,$ohimApiUser,$ohimApiPassword);
-$data = $obj->getTransactionData("597d16719fe74a11201eef1c");
-$data = json_decode($data,true);
-$body = $data["response"]["body"];
-$body = json_decode($body,true);
-if (json_last_error() === JSON_ERROR_NONE) {
-  if(in_array("Still Processing",$body)) {
-    $body = array("Hello1");
-  }
-  else
-  array_push($body,array("Hello2"));
-  $data["response"]["body"] = $body;
-  }
-else {
-  $data["response"]["body"] = array("Hello3");
-  echo "Here";
-}
-
-print_r($data);
-*/
 ?>
