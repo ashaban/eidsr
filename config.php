@@ -8,12 +8,18 @@ $rapidpro_url = "http://192.168.43.241:8000/";
 $csd_host = "http://localhost:8984/CSD/";
 $csd_user = "csd";
 $csd_passwd = "csd";
-$csd_doc = "mhero_liberia_test";
+$csd_doc = "mhero_liberia_small";
 $rp_csd_doc = "mhero_liberia_rapidpro";
 //$eidsr_host = "https://lib-eidsr-stage.ehealthafrica.org/casealert";
 $eidsr_host = "https://lib-eidsr-dev.ehealthafrica.org/casealert";
-$eidsr_user = "rapidpro";
-$eidsr_passwd = "l2JxD60ndYcv";
+$eidsr_user = "username";
+$eidsr_passwd = "password";
 $notify_group = array("DPC Group","National Reference Lab");
 $riders_group = "Riders Dispatch Testing";
+$eidsr_counties = array(
+                        "urn:uuid:db6b3cf1-e2e8-3897-bbab-039f4db7149c"=>"Margibi",
+                        "urn:uuid:67fccc2f-5f9e-393b-8146-5d0af4d3356b"=>"Grand Cape Mount"
+                        );
+$weekly_report_first_day = 1; //1 for Monday, 2 for Tuesday 3 for Wednesday etc;
+$weekly_report_submission = 7;
 ?>

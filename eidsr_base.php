@@ -16,6 +16,22 @@ class eidsr_base extends openHimUtilities {
     $this->eidsr_passwd = $eidsr_passwd;
   }
 
+  public function get_provider_facility($provider_uuid) {
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+          <csd:id entityID="'.$provider_uuid.'">
+          </csd:id>
+        </csd:requestParams>';
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
+    $prov_entity = $this->exec_request("Getting Reporter Details",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    if($prov_entity == "") {
+      error_log("An error has ocured,Openinfoman has returned empty results");
+      return false;
+    }
+    $fac_uuid = $this->extract($prov_entity,"/csd:provider/csd:facilities/csd:facility/@entityID",'providerDirectory',true);
+    $fac_det = $this->get_facility_details ($fac_uuid,"uuid");
+    return $fac_det;
+  }
+
   public function get_facility_details ($facility_identifier,$type) {
     if($type == "code") {
       $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
@@ -72,6 +88,7 @@ class eidsr_base extends openHimUtilities {
                   "county_name"=>$county_name,
                   "county_code"=>$county_code
                  );
+                 error_log(print_r($fac_det,true));
     return $fac_det;
   }
 
@@ -116,6 +133,19 @@ class eidsr_base extends openHimUtilities {
             }
       }
     return $rp_ids;
+  }
+
+  public function get_counties () {
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+           <csd:codedType code="REGION" codingScheme="urn:ihris.org:ihris-manage-liberia:organizations:types"/>
+          </csd:requestParams>';
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:organization-search";
+    $county_entity = $this->exec_request("Getting Counties",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
+    $county_uuids = $this->extract($county_entity,"/csd:organization/@entityID",'organizationDirectory',true);
+    $county_uuids = explode(";", $county_uuids);
+    if(count($county_uuids) == 0) {
+      array_push($this->response_body,array("Counties"=>"No Counties Found"));
+    }
   }
 
   public function get_county_districts($county_uuid) {
@@ -364,6 +394,15 @@ class eidsr_base extends openHimUtilities {
         $this->exec_request("Starting A Workflow",$url,"","","POST",$post_data,$header);
       }
     }
+  }
+
+  public function find_weekly_report_by_period($week_period,$facility_globalid) {
+    $weekly_reports = (new MongoDB\Client)->eidsr->weekly_report;
+    $report = $weekly_reports->findOne(array('$and'=>array(
+                                                  array('week_period' => $week_period),
+                                                  array("facility_globalid"=> $facility_globalid)
+                                                )));
+    return $report;
   }
 
   public function exec_request($request_name,$url,$user,$password,$req_type,$post_data,$header = Array("Content-Type: text/xml"),$get_header=false) {

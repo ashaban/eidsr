@@ -52,22 +52,6 @@ class eidsr extends eidsr_base{
     $this->county_uuid = $this->facility_details["county_uuid"];
   }
 
-  public function get_provider_facility($provider_uuid) {
-    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-          <csd:id entityID="'.$provider_uuid.'">
-          </csd:id>
-        </csd:requestParams>';
-    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
-    $prov_entity = $this->exec_request("Getting Reporter Details",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-    if($prov_entity == "") {
-      error_log("An error has ocured,Openinfoman has returned empty results");
-      return false;
-    }
-    $fac_uuid = $this->extract($prov_entity,"/csd:provider/csd:facilities/csd:facility/@entityID",'providerDirectory',true);
-    $fac_det = $this->get_facility_details ($fac_uuid,"uuid");
-    return $fac_det;
-  }
-
   public static function trim_values(&$value) {
     $value = trim($value);
   }
@@ -259,6 +243,7 @@ class eidsr extends eidsr_base{
     error_log(print_r($sync_server_results,true));
 
     $collection = (new MongoDB\Client)->eidsr->case_details;
+    $date = date("Y-m-d\TH:m:s");
     $insertOneResult = $collection->insertOne([
                                                 "disease_name"=>$this->reported_disease,
                                                 "idsr_id"=>$idsrid,
@@ -269,7 +254,8 @@ class eidsr extends eidsr_base{
                                                 "facility_name"=>$this->facility_details["facility_name"],
                                                 "district_name"=>$this->facility_details["district_name"],
                                                 "county_name"=>$this->facility_details["county_name"],
-                                                "openHimTransactionID"=>$this->openHimTransactionID
+                                                "openHimTransactionID"=>$this->openHimTransactionID,
+                                                "date"=>$date
                                               ]);
     error_log("case details saved to database with id ".$insertOneResult->getInsertedId());
 
@@ -319,9 +305,10 @@ session_write_close();
 
 require("config.php");
 require("openHimConfig.php");
+//loading mongodb for php
 require_once __DIR__ . "/vendor/autoload.php";
 
-//$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.77985','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:c8125cb3-3bb6-3676-835d-7bc3290add6f');
+$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.7798599','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:c8125cb3-3bb6-3676-835d-7bc3290add6f');
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
