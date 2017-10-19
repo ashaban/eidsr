@@ -2,7 +2,7 @@
 require ("openHimConfig.php");
 require ("openHimUtilities.php");
 class eidsr_base extends openHimUtilities {
-  function __construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$ohimApiHost,$ohimApiUser,$ohimApiPassword) {
+  function __construct($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database) {
     parent::__construct($ohimApiHost,$ohimApiUser,$ohimApiPassword);
     $this->rapidpro_token = $rapidpro_token;
     $this->rapidpro_host = $rapidpro_url;
@@ -10,6 +10,7 @@ class eidsr_base extends openHimUtilities {
     $this->csd_user = $csd_user;
     $this->csd_passwd = $csd_passwd;
     $this->csd_doc = $csd_doc;
+    $this->database = $database;
     $this->rp_csd_doc = $rp_csd_doc;
     $this->eidsr_host = $eidsr_host;
     $this->eidsr_user = $eidsr_user;
@@ -397,7 +398,7 @@ class eidsr_base extends openHimUtilities {
   }
 
   public function find_weekly_report_by_period($week_period,$facility_globalid) {
-    $weekly_reports = (new MongoDB\Client)->eidsr->weekly_report;
+    $weekly_reports = (new MongoDB\Client)->{$this->database}->weekly_report;
     $report = $weekly_reports->findOne(array('$and'=>array(
                                                   array('week_period' => $week_period),
                                                   array("facility_globalid"=> $facility_globalid)

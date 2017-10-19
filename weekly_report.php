@@ -4,11 +4,11 @@ class weekly_report extends eidsr_base{
   function __construct(
                         $reporter_phone,$reporter_name,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
                         $rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,
-                        $eidsr_passwd,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword
+                        $eidsr_passwd,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database
                       ) {
     parent::__construct(
                         $rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,
-                        $eidsr_user,$eidsr_passwd,$ohimApiHost,$ohimApiUser,$ohimApiPassword
+                        $eidsr_user,$eidsr_passwd,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database
                        );
      $this->orchestrations = array();
      $this->response_body = array();
@@ -23,6 +23,7 @@ class weekly_report extends eidsr_base{
      $this->csd_passwd = $csd_passwd;
      $this->csd_doc = $csd_doc;
      $this->rp_csd_doc = $rp_csd_doc;
+     $this->database = $database;
      $this->eidsr_host = $eidsr_host;
      $this->eidsr_user = $eidsr_user;
      $this->eidsr_passwd = $eidsr_passwd;
@@ -118,7 +119,7 @@ $cases = str_ireplace("wr.","",$cases);
 error_log("received weekly report with details ".print_r($_REQUEST,true));
 $weeklyReport = new weekly_report($reporter_phone,$reporter_name,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
                                   $rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,
-                                  $eidsr_passwd,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword
+                                  $eidsr_passwd,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database
                                  );
 
 $weeklyReport->notify_group = $notify_group;
@@ -163,7 +164,7 @@ if(ctype_digit(strval($cases))) {
   /**to do
   //submit it to the sync server
   */
-  $collection = (new MongoDB\Client)->eidsr->weekly_report;
+  $collection = (new MongoDB\Client)->{$database}->weekly_report;
   $date = date("Y-m-d\TH:m:s");
   $insertOneResult = $collection->insertOne([
                                               "trackerid"=>$trackerid,

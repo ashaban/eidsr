@@ -4,11 +4,11 @@ class eidsr extends eidsr_base{
   function __construct(
                         $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,
                         $case_alert_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,
-                        $eidsr_passwd,$reported_disease,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword
+                        $eidsr_passwd,$reported_disease,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database
                       ) {
     parent::__construct(
                         $rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,
-                        $eidsr_user,$eidsr_passwd,$ohimApiHost,$ohimApiUser,$ohimApiPassword
+                        $eidsr_user,$eidsr_passwd,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database
                        );
 
     $this->orchestrations = array();
@@ -30,6 +30,7 @@ class eidsr extends eidsr_base{
     $this->eidsr_host = $eidsr_host;
     $this->eidsr_user = $eidsr_user;
     $this->eidsr_passwd = $eidsr_passwd;
+    $this->database = $database;
     $this->transaction_status = "Successful";
     $this->openHimTransactionID = $openHimTransactionID;
 
@@ -242,8 +243,7 @@ class eidsr extends eidsr_base{
     }
     $sync_server_results = array("trackerid"=>$trackerid,"idsrid"=>$idsrid);
     error_log(print_r($sync_server_results,true));
-
-    $collection = (new MongoDB\Client)->eidsr->case_details;
+    $collection = (new MongoDB\Client)->{$this->database}->case_details;
     $date = date("Y-m-d\TH:m:s");
     $insertOneResult = $collection->insertOne([
                                                 "disease_name"=>$this->reported_disease,
@@ -275,7 +275,7 @@ class eidsr extends eidsr_base{
 
     $post_data = '{'.$comm_det.$inter_trav.$reason_no_specimen.$specimen_collected.'}';
     error_log($post_data);
-    $url = $this->eidsr_host."/".$this->trackerid;
+    $url = $this->eidsr_host."/".urlencode($this->trackerid);
     $header = Array(
                     "Content-Type: application/json"
                    );
@@ -309,7 +309,7 @@ require("openHimConfig.php");
 //loading mongodb for php
 require_once __DIR__ . "/vendor/autoload.php";
 
-//$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.7798599','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:c8125cb3-3bb6-3676-835d-7bc3290add6f');
+//$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.7798599','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'36c826a2-0585-42d0-84de-9522cc97fe18','reporter_globalid'=>'urn:uuid:5e841057-aca1-3b58-aaa3-allyshaban');
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
@@ -323,7 +323,7 @@ $report = str_ireplace("testalert.","",$report);
 $report = str_ireplace("alert.","",$report);
 $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
                     $rapidpro_url,$case_alert_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,
-                    $eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword
+                    $eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database
                   );
 
 //if no facility for the reporter then
@@ -367,8 +367,8 @@ if($category == "update") {
   if($eidsr->specimen_collected == "Yes") {
     $riders_contacts = $eidsr->get_contacts_in_grp(urlencode($riders_group));
     if(count($riders_contacts) > 0) {
-      $reported_cases = (new MongoDB\Client)->eidsr->case_details;
-      $case = $reported_cases->findOne(['trackerid' => $eidsr->trackerid]);
+      $reported_cases = (new MongoDB\Client)->{$eidsr->database}->case_details;
+      $case = $reported_cases->findOne(array('trackerid' => urlencode($eidsr->trackerid)));
       $msg = "A suspected case of ".$case["disease_name"]." Has been Reported From ".$case["facility_name"]."(".$case["district_name"].",".$case["county_name"].") With IDSRID ".$case["idsr_id"].". Sample is available at this facility for you to pick";
       $eidsr->broadcast("Alert Riders",$riders_contacts,$msg);
     }
