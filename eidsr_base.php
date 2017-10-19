@@ -147,6 +147,7 @@ class eidsr_base extends openHimUtilities {
     if(count($county_uuids) == 0) {
       array_push($this->response_body,array("Counties"=>"No Counties Found"));
     }
+    return $county_uuids;
   }
 
   public function get_county_districts($county_uuid) {
@@ -403,6 +404,17 @@ class eidsr_base extends openHimUtilities {
                                                   array('week_period' => $week_period),
                                                   array("facility_globalid"=> $facility_globalid)
                                                 )));
+    return $report;
+  }
+
+  public function find_case_reporters_by_facility_date($start_date,$end_date,$facility_globalid) {
+    $weekly_reports = (new MongoDB\Client)->{$this->database}->weekly_report;
+    $report = $weekly_reports->find(array('$and'=>array(
+                                                  array('date'=>array('$gt' => $start_date,'$lt' => $end_date)),
+                                                  array("facility_globalid" => $facility_globalid)
+                                                )));
+                                                error_log($start_date);
+                                                error_log($end_date);
     return $report;
   }
 
