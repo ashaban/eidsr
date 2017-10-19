@@ -69,11 +69,14 @@ class weekly_reminders extends eidsr_base{
               $week_period = date('j-n-Y',strtotime("$this->report_first_day_name this week"));
             }
           }
+          //check if there is weekly report on this facility for this week
           $report = $this->find_weekly_report_by_period($week_period,$facility_globalid);
           if($report["_id"] != "" or $report["_id"] != null or $report["_id"] != false) {
             continue;
           }
           else {
+            //no weekly report Found
+            //lets search HWs who normally sends alerts and then remind them
             $formatted_week_period = date("l jS \of F Y",strtotime($week_period));
             $start_date = date("Y-m-d\T00:00:00",strtotime("this month -2 months"));
             $end_date = date("Y-m-d\T23:59:59");
@@ -89,6 +92,16 @@ class weekly_reminders extends eidsr_base{
               $msg = "Hi, this is a reminder to submit the weekly EPI Case Report for the week of $formatted_week_period in your facility ".$wr["facility_name"].".Send an SMS in the format wr.total_cases to the short code 4636";
               $this->broadcast("Remind Facility About Weekly Report",array($wr["reporter_rapidpro_id"]),$msg);
               $reminded[] = $wr["reporter_rapidpro_id"];
+            }
+            //in case no HWs found on the DB who normally sends alers or weekly reports then ask DSO to remind the facility
+            if(count($reminded) == 0) {
+              $dso = $this->get_dso($district);
+              $fac_det = $this->get_facility_details ($facility_globalid,"uuid");
+              $contacts = $this->get_rapidpro_id($dso);
+              if(count($contacts) > 0) {
+                $msg = $fac_det["facility_name"]."(".$fac_det["district_name"].",".$fac_det["county_name"].") Has not submitted EPI Case Report for the week of $formatted_week_period . Please remind them to send the report in the format wr.total_cases to the short code 4636";
+                $this->broadcast("Ask DSO to remind facility",$contacts,$msg);
+              }
             }
           }
         }

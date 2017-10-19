@@ -408,13 +408,17 @@ class eidsr_base extends openHimUtilities {
   }
 
   public function find_case_reporters_by_facility_date($start_date,$end_date,$facility_globalid) {
-    $weekly_reports = (new MongoDB\Client)->{$this->database}->weekly_report;
-    $report = $weekly_reports->find(array('$and'=>array(
-                                                  array('date'=>array('$gt' => $start_date,'$lt' => $end_date)),
-                                                  array("facility_globalid" => $facility_globalid)
-                                                )));
-                                                error_log($start_date);
-                                                error_log($end_date);
+    $weekly_reports = (new MongoDB\Client)->{$this->database}->case_details;
+    $filter = array('$and'=>array(
+                                  array('date'=>array('$gt' => $start_date,'$lt' => $end_date)),
+                                  array("facility_globalid" => $facility_globalid)
+                                ));
+    if($weekly_reports->count($filter) == 0) {
+      $case_reports = (new MongoDB\Client)->{$this->database}->weekly_report;
+      $report = $case_reports->find($filter);
+    }
+    else
+    $report = $weekly_reports->find($filter);
     return $report;
   }
 

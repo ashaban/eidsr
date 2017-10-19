@@ -251,6 +251,7 @@ class eidsr extends eidsr_base{
                                                 "trackerid"=>$trackerid,
                                                 "reporter_globalid"=>$this->reporter_globalid,
                                                 "reporter_rapidpro_id"=>$this->reporter_rp_id,
+                                                "facility_globalid"=>$this->facility_details["facility_uuid"],
                                                 "facility_code"=>$this->facility_details["facility_code"],
                                                 "facility_name"=>$this->facility_details["facility_name"],
                                                 "district_name"=>$this->facility_details["district_name"],
