@@ -50,7 +50,7 @@ class weekly_report extends eidsr_base{
   }
 
   public function alert_all ($cases,$week_period){
-    $msg = $this->reporter_name ." Has submitted a weekly report of $cases aggregate cases from ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") for the period $week_period";
+    $msg = $this->reporter_name ." Has submitted a weekly report of $cases aggregate cases from ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") for the week period $week_period";
     $cont_alert = array();
     foreach($this->notify_group as $group_name) {
       $other_contacts = $this->get_contacts_in_grp(urlencode($group_name));
@@ -113,7 +113,8 @@ $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
 $report_first_day_name = date('l', strtotime("Sunday +{$weekly_report_first_day} days"));
 $cases = str_ireplace("testwr.","",$report);
-$cases = str_ireplace("wr.","",$report);
+$cases = str_ireplace("wr.","",$cases);
+
 error_log("received weekly report with details ".print_r($_REQUEST,true));
 $weeklyReport = new weekly_report($reporter_phone,$reporter_name,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
                                   $rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,
@@ -136,11 +137,18 @@ if(count($casesArr) == 1) {
     $week_period = date("j-n-Y",strtotime("$report_first_day_name last week"));
   }
   else {
-    $week_period = date("j-n-Y",strtotime("$report_first_day_name this week"));
+    //php treats Sunday as the first day of the week
+    if(date('N') == 7) {
+      $week_period = date('j-n-Y',strtotime("$report_first_day_name last week"));
+    }
+    else {
+      $week_period = date('j-n-Y',strtotime("$report_first_day_name this week"));
+    }
   }
   $report = $weeklyReport->find_weekly_report_by_period($week_period,$weeklyReport->facility_details["facility_uuid"]);
   if($report["_id"] != "" or $report["_id"] != null or $report["_id"] != false) {
-    $weeklyReport->broadcast("Alert Reporter of Weekly Report",array($reporter_rp_id),"The weekly report for week of $week_period already exists,your weekly report was not accepted");
+    $formatted_week_period = date("l jS \of F Y",strtotime($week_period));
+    $weeklyReport->broadcast("Alert Reporter of Weekly Report",array($reporter_rp_id),"The weekly report for week of $formatted_week_period already exists,your weekly report was not accepted");
     $weeklyReport->updateTransaction($openHimTransactionID,"Failed",$weeklyReport->response_body,400,$weeklyReport->orchestrations);
     return false;
   }

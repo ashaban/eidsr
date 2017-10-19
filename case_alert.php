@@ -10,6 +10,7 @@ class eidsr extends eidsr_base{
                         $rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,
                         $eidsr_user,$eidsr_passwd,$ohimApiHost,$ohimApiUser,$ohimApiPassword
                        );
+
     $this->orchestrations = array();
     $this->response_body = array();
     $this->reporter_phone = $reporter_phone;
@@ -308,7 +309,7 @@ require("openHimConfig.php");
 //loading mongodb for php
 require_once __DIR__ . "/vendor/autoload.php";
 
-$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.7798599','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:c8125cb3-3bb6-3676-835d-7bc3290add6f');
+//$_REQUEST = array('category'=>'alert_all','report'=>'Alert.lf.7798599','reporter_phone'=>'077 615 9231','reporter_name'=>'Ally Shaban','reported_disease'=>'Lassa Fever','reporter_rp_id'=>'43f66ce0-ecd7-4ac1-b615-7259bd4e9b55','reporter_globalid'=>'urn:uuid:c8125cb3-3bb6-3676-835d-7bc3290add6f');
 $category = $_REQUEST["category"];
 $reporter_phone = $_REQUEST["reporter_phone"];
 $report = $_REQUEST["report"];
@@ -316,7 +317,6 @@ $reported_disease = $_REQUEST["reported_disease"];
 $reporter_rp_id = $_REQUEST["reporter_rp_id"];
 $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
-
 //require("test_config.php");
 //in case this is comming from test workflow
 $report = str_ireplace("testalert.","",$report);
