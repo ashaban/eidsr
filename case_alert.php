@@ -365,13 +365,13 @@ $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$repo
                     $rapidpro_url,$case_alert_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,
                     $eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database
                   );
-
+$eidsr->issues_alert_group = $issues_alert_group;
 //if no facility for the reporter then
 if($eidsr->facility_details["facility_uuid"] == "") {
   $eidsr->broadcast("Alert Case Reporter",array($reporter_rp_id),"You are not allowed to access EIDSR system");
 
   //alert eIDSR MOH Supervisors
-  $msg = "A contact with rapidpro ID $this->reporter_rp_id Tried to send an alert but he is not authorized to do so,go and review.openHIM Transaction ID is $eidsr->openHimTransactionID";
+  $msg = "A contact with rapidpro ID $eidsr->reporter_rp_id Tried to send an alert but is not authorized to do so,go and review.openHIM Transaction ID is $eidsr->openHimTransactionID";
   $eidsr->alert_issues($msg,$eidsr->issues_alert_group);
 
   $eidsr->updateTransaction($openHimTransactionID,"Failed",$eidsr->response_body,200,$eidsr->orchestrations);
@@ -380,7 +380,6 @@ if($eidsr->facility_details["facility_uuid"] == "") {
 
 if($category == "alert_all") {
   $eidsr->notify_group = $notify_group;
-  $eidsr->issues_alert_group = $issues_alert_group;
   $eidsr->riders_group = $riders_group;
   $valid = $eidsr->validate_report();
   if($valid) {

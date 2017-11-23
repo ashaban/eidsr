@@ -381,6 +381,7 @@ class eidsr_base extends openHimUtilities {
 
   public function alert_issues($msg,$groups) {
     //alert eIDSR MOH Supervisors
+    $cont_alert = array();
     foreach($groups as $group_name) {
       $other_contacts = $this->get_contacts_in_grp(urlencode($group_name));
       if(count($other_contacts)>0)
