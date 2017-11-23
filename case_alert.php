@@ -181,11 +181,21 @@ class eidsr extends eidsr_base{
     if(count($header) == 0 or $header == "") {
       error_log("Something went wrong,sync server returned empty header");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
+
+      //alert eIDSR MOH Supervisors
+      $msg = "A contact with rapidpro ID $this->reporter_rp_id Submitted a case but an error occured on the sync server,go and review. openHIM Transaction ID is $this->openHimTransactionID";
+      $this->alert_issues($msg,$this->issues_alert_group);
+
       array_push($this->response_body,array("Case Details"=>"Something went wrong,sync server returned empty header"));
     }
     if(count($body) == 0 or $body == "") {
       error_log("Something went wrong,sync server returned empty body");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
+
+      //alert eIDSR MOH Supervisors
+      $msg = "A contact with rapidpro ID $this->reporter_rp_id Submitted a case but an error occured on the sync server,go and review. openHIM Transaction ID is $this->openHimTransactionID";
+      $this->alert_issues($msg,$this->issues_alert_group);
+
       array_push($this->response_body,array("Case Details"=>"Something went wrong,sync server returned empty body"));
       return false;
     }
@@ -194,6 +204,11 @@ class eidsr extends eidsr_base{
     if(array_key_exists("message",$body) and strpos($body["message"],"The caseI id is already") !== false) {
       error_log("The caseID you submitted is already used,pleae resubmit this case with a different caseID");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"The caseID you submitted is already used,please resubmit this case with a different caseID");
+
+      //alert eIDSR MOH Supervisors
+      $msg = "A contact with rapidpro ID $this->reporter_rp_id Submitted a case with a duplicated case ID,go and review. openHIM Transaction ID is $this->openHimTransactionID";
+      $this->alert_issues($msg,$this->issues_alert_group);
+
       array_push($this->response_body,array("Case Details"=>$body));
       return false;
     }
@@ -201,6 +216,11 @@ class eidsr extends eidsr_base{
     else if(array_key_exists("error",$body) and $body["error"] == "Duplicate caseid") {
       error_log("The caseID you submitted is already used,pleae resubmit this case with a different caseID");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"The caseID you submitted is already used,please resubmit this case with a different caseID");
+
+      //alert eIDSR MOH Supervisors
+      $msg = "A contact with rapidpro ID $this->reporter_rp_id Submitted a case with a duplicated case ID,go and review. openHIM Transaction ID is $this->openHimTransactionID";
+      $this->alert_issues($msg,$this->issues_alert_group);
+
       array_push($this->response_body,array("Case Details"=>$body));
       return false;
     }
@@ -208,6 +228,11 @@ class eidsr extends eidsr_base{
       error_log($body["message"]);
       array_push($this->response_body,array("Case Details"=>$body));
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"You are located in a facility that is not allowed to send case alerts");
+
+      //alert eIDSR MOH Supervisors
+      $msg = "A contact with rapidpro ID $this->reporter_rp_id Submitted a case but he/she is in a facility that is not allowed to send case alerts,go and review. openHIM Transaction ID is $this->openHimTransactionID";
+      $this->alert_issues($msg,$this->issues_alert_group);
+
       return false;
     }
     //above if statement will be replaced with this else statement after offline tracker codes that are in dev get deployed to production
@@ -215,6 +240,10 @@ class eidsr extends eidsr_base{
       error_log($body["error"]);
       array_push($this->response_body,array("Case Details"=>$body));
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"You are located in a facility that is not allowed to send case alerts");
+
+      //alert eIDSR MOH Supervisors
+      $msg = "A contact with rapidpro ID $this->reporter_rp_id Submitted a case but he/she is in a facility that is not allowed to send case alerts,go and review. openHIM Transaction ID is $this->openHimTransactionID";
+      $this->alert_issues($msg,$this->issues_alert_group);
       return false;
     }
 
@@ -222,6 +251,11 @@ class eidsr extends eidsr_base{
       //report this to openHIM
       error_log($response);
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
+
+      //alert eIDSR MOH Supervisors
+      $msg = "A contact with rapidpro ID $this->reporter_rp_id Submitted a case but an error occured on the sync server,go and review. openHIM Transaction ID is $this->openHimTransactionID";
+      $this->alert_issues($msg,$this->issues_alert_group);
+
       array_push($this->response_body,array("Case Details"=>"IDSRID was not returned by the sync server"));
       array_push($this->response_body,array("Case Details"=>$body));
       return false;
@@ -230,6 +264,11 @@ class eidsr extends eidsr_base{
     if(!$idsrid) {
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
       array_push($this->response_body,array("Case Details"=>"IDSRID was not returned by the sync server"));
+
+      //alert eIDSR MOH Supervisors
+      $msg = "A contact with rapidpro ID $this->reporter_rp_id Submitted a case but an error occured on the sync server,go and review. openHIM Transaction ID is $this->openHimTransactionID";
+      $this->alert_issues($msg,$this->issues_alert_group);
+
       error_log("IDSRID was not returned by the sync server");
       return false;
     }
@@ -276,7 +315,7 @@ class eidsr extends eidsr_base{
 
     $post_data = '{'.$comm_det.$inter_trav.$reason_no_specimen.$specimen_collected.'}';
     error_log($post_data);
-    $url = $this->eidsr_host."/".urlencode($this->trackerid);
+    $url = $this->eidsr_host."/".$this->trackerid;
     $header = Array(
                     "Content-Type: application/json"
                    );
@@ -330,12 +369,18 @@ $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$repo
 //if no facility for the reporter then
 if($eidsr->facility_details["facility_uuid"] == "") {
   $eidsr->broadcast("Alert Case Reporter",array($reporter_rp_id),"You are not allowed to access EIDSR system");
+
+  //alert eIDSR MOH Supervisors
+  $msg = "A contact with rapidpro ID $this->reporter_rp_id Tried to send an alert but he is not authorized to do so,go and review.openHIM Transaction ID is $eidsr->openHimTransactionID";
+  $eidsr->alert_issues($msg,$eidsr->issues_alert_group);
+
   $eidsr->updateTransaction($openHimTransactionID,"Failed",$eidsr->response_body,200,$eidsr->orchestrations);
   return;
 }
 
 if($category == "alert_all") {
   $eidsr->notify_group = $notify_group;
+  $eidsr->issues_alert_group = $issues_alert_group;
   $eidsr->riders_group = $riders_group;
   $valid = $eidsr->validate_report();
   if($valid) {
@@ -354,6 +399,12 @@ if($category == "alert_all") {
   }
   else {
     $eidsr->broadcast("Alert Case Reporter",array($reporter_rp_id),"Case Id for this case report is missing,please resubmit the case with case ID");
+
+    //alert eIDSR MOH Supervisors
+    $msg = "A contact with rapidpro ID $this->reporter_rp_id Submitted a case without caseID,go and review.openHIM Transaction ID is $eidsr->openHimTransactionID";
+    $eidsr->alert_issues($msg,$eidsr->issues_alert_group);
+
+
     $eidsr->updateTransaction($openHimTransactionID,"Failed",$eidsr->response_body,400,$eidsr->orchestrations);
     return;
   }

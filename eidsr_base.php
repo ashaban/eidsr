@@ -379,6 +379,16 @@ class eidsr_base extends openHimUtilities {
       array_push($this->response_body,array($subject=>$broadcast_data));
   }
 
+  public function alert_issues($msg,$groups) {
+    //alert eIDSR MOH Supervisors
+    foreach($groups as $group_name) {
+      $other_contacts = $this->get_contacts_in_grp(urlencode($group_name));
+      if(count($other_contacts)>0)
+      $cont_alert = array_merge($cont_alert,$other_contacts);
+    }
+    $this->broadcast("Issue Alert",$cont_alert,$msg);
+  }
+
   public function start_flow($flow_uuid,$group_uuid,$contacts_uuid = array(),$extra) {
     $url = $this->rapidpro_host."api/v2/flow_starts.json";
     $header = Array(
