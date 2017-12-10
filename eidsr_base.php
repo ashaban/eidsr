@@ -196,34 +196,21 @@ class eidsr_base extends openHimUtilities {
       error_log("District UUID Missing,DSO wont be alerted");
       return array();
     }
-    //get facilities under $district_uuid
-    $fac_uuids = $this->get_district_facilities($district_uuid);
-    //foreach facility,fetch providers and check if is DSO
     global $dso;
     $dso = array();
-    foreach ($fac_uuids as $fac_uuid) {
-      $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-           <csd:facilities>
-            <csd:facility  entityID="'.$fac_uuid.'"/>
-           </csd:facilities>
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-lb:dso_search";
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+            <csd:organization entityID="'.$district_uuid.'"/>
           </csd:requestParams>';
-      $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
-      $prov_entity = $this->exec_request("Getting Providers In A Facility",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-      $prov_entity = new SimpleXMLElement($prov_entity);
-      foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
-        global $dso;
-        if($prov->extension->position && $prov->extension->position->attributes()->title ) {
-          if( $prov->extension->position->attributes()->title == "District Surveillance Officer" or
-              strpos($prov->extension->position->attributes()->title,"District Surveillance") !== false or
-              $prov->extension->position->attributes()->title == "DSO"){
-            $curr_dso = $dso;
-            if(count($curr_dso)==0)
-              $curr_dso = array();
-            $dso1 = array((string)$prov->attributes()->entityID);
-            $dso = array_merge($curr_dso,$dso1);
-          }
-        }
-      }
+    $prov_entity = exec_request("Getting DSO",$url,"","","POST",$csr);
+    $prov_entity = new SimpleXMLElement($prov_entity);
+    foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
+      global $dso;
+      $curr_dso = $dso;
+      if(count($curr_dso)==0)
+        $curr_dso = array();
+      $dso1 = array((string)$prov->attributes()->entityID);
+      $dso = array_merge($curr_dso,$dso1);
     }
     error_log("DSO===>" . print_r($dso,true));
     if(count($dso) == 0) {
@@ -236,42 +223,21 @@ class eidsr_base extends openHimUtilities {
   }
 
   public function get_cso($county_uuid) {
-    $distr_uuids = $this->get_county_districts($county_uuid);
-    $fac_uuids = array();
-    foreach ($distr_uuids as $distr_uuid) {
-      $fac = $this->get_district_facilities($distr_uuid);
-      $curr_fac = $fac_uuids;
-      if(count($curr_fac)==0)
-        $curr_fac = array();
-      $fac_uuids = array_merge($curr_fac,$fac);
-    }
-
-    //foreach facility,fetch providers and check if is DSO
     global $cso;
     $cso = array();
-    foreach ($fac_uuids as $fac_uuid) {
-      $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-           <csd:facilities>
-            <csd:facility  entityID="'.$fac_uuid.'"/>
-           </csd:facilities>
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-lb:cso_search";
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+            <csd:organization entityID="'.$county_uuid.'"/>
           </csd:requestParams>';
-      $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
-      $prov_entity = $this->exec_request("Getting Providers In A Facility",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-      $prov_entity = new SimpleXMLElement($prov_entity);
-      foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
-        global $cso;
-        if($prov->extension->position && $prov->extension->position->attributes()->title ) {
-          if( $prov->extension->position->attributes()->title == "County Surveillance Officer" or
-              strpos($prov->extension->position->attributes()->title,"County Surveillance") !== false or
-              $prov->extension->position->attributes()->title == "CSO"){
-            $curr_cso = $cso;
-            if(count($curr_cso)==0)
-              $curr_cso = array();
-            $cso1 = array((string)$prov->attributes()->entityID);
-            $cso = array_merge($curr_cso,$cso1);
-          }
-        }
-      }
+    $prov_entity = exec_request("Getting CSO",$url,"","","POST",$csr);
+    $prov_entity = new SimpleXMLElement($prov_entity);
+    foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
+      global $cso;
+      $curr_cso = $cso;
+      if(count($curr_cso)==0)
+        $curr_cso = array();
+      $cso1 = array((string)$prov->attributes()->entityID);
+      $cso = array_merge($curr_cso,$cso1);
     }
     error_log("CSO===>" . print_r($cso,true));
     if(count($cso) == 0) {
@@ -284,41 +250,20 @@ class eidsr_base extends openHimUtilities {
   }
 
   public function get_cdo($county_uuid) {
-    $distr_uuids = $this->get_county_districts($county_uuid);
-    $fac_uuids = array();
-    foreach ($distr_uuids as $distr_uuid) {
-      $fac = $this->get_district_facilities($distr_uuid);
-      $curr_fac = $fac_uuids;
-      if(count($curr_fac)==0)
-        $curr_fac = array();
-      $fac_uuids = array_merge($curr_fac,$fac);
-    }
-
-    //foreach facility,fetch providers and check if is DSO
     $cdo = array();
-    foreach ($fac_uuids as $fac_uuid) {
-      $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
-           <csd:facilities>
-            <csd:facility  entityID="'.$fac_uuid.'"/>
-           </csd:facilities>
+    $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:openhie.org:openinfoman-lb:cdo_search";
+    $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
+            <csd:organization entityID="'.$county_uuid.'"/>
           </csd:requestParams>';
-      $url = $this->csd_host."csr/{$this->csd_doc}/careServicesRequest/urn:ihe:iti:csd:2014:stored-function:provider-search";
-      $prov_entity = $this->exec_request("Getting Providers In A Facility",$url,$this->csd_user,$this->csd_passwd,"POST",$csr);
-      $prov_entity = new SimpleXMLElement($prov_entity);
-      foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
-        global $cdo;
-        if($prov->extension->position && $prov->extension->position->attributes()->title ) {
-          if( $prov->extension->position->attributes()->title == "County Diagnostic Officer" or
-              strpos($prov->extension->position->attributes()->title,"County Diagnostic") !== false or
-              $prov->extension->position->attributes()->title == "CDO"){
-            $curr_cdo = $cdo;
-            if(count($curr_cdo)==0)
-              $curr_cdo = array();
-            $cdo1 = array((string)$prov->attributes()->entityID);
-            $cdo = array_merge($curr_cdo,$cdo1);
-          }
-        }
-      }
+    $prov_entity = exec_request("Getting CDO",$url,"","","POST",$csr);
+    $prov_entity = new SimpleXMLElement($prov_entity);
+    foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
+      global $cdo;
+      $curr_cdo = $cdo;
+      if(count($curr_cdo)==0)
+        $curr_cdo = array();
+      $cdo1 = array((string)$prov->attributes()->entityID);
+      $cdo = array_merge($curr_cdo,$cdo1);
     }
     error_log("CDO===>" . print_r($cdo,true));
     if(count($cdo) == 0) {
@@ -431,6 +376,12 @@ class eidsr_base extends openHimUtilities {
     else
     $report = $weekly_reports->find($filter);
     return $report;
+  }
+
+  public function find_case_by_id($trackerid) {
+    $cases = (new MongoDB\Client)->{$this->database}->case_details
+    $case = $cases->findOne(array("trackerid"=>$trackerid));
+    return $case;
   }
 
   public function exec_request($request_name,$url,$user,$password,$req_type,$post_data,$header = Array("Content-Type: text/xml"),$get_header=false) {

@@ -18,7 +18,6 @@ class riders extends eidsr_base {
     $this->openHimTransactionID = $openHimTransactionID;
     //this variable will holds all the transactionIds for every picked/delivered samples,in case an sms come in format picked.idsrid1.idsrid2
     $this->openHimTransactionIDs = array();
-    $this->notify_group = array("DPC Group","National Reference Lab");
   }
 
   public function sample_action($action) {
@@ -182,7 +181,7 @@ $riderObj = new riders($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_pa
                   $csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$samples,
                   $reporter_rp_id,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword
                  );
-
+$riderObj->notify_group = $notify_group;
 if($category == "sample_picked") {
   $riderObj->flow_uuid = $riders_picked_flow_uuid;
   $success = $riderObj->sample_action("sample_picked");

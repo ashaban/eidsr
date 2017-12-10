@@ -83,7 +83,7 @@ class weekly_reminders extends eidsr_base{
             $wrs = $this->find_case_reporters_by_facility_date($start_date,$end_date,$facility_globalid);
             $reminded = array();
             foreach($wrs as $wr) {
-              //lets check if your are still working on this facility,otherwise we dont send you an alert
+              //lets check if your still working on this facility,otherwise we dont send you an alert
               $fac_det = $this->get_provider_facility($wr["reporter_globalid"]);
               if($fac_det["facility_uuid"]!=$wr["facility_globalid"])
               continue;
