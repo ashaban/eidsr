@@ -318,7 +318,7 @@ class eidsr_base extends openHimUtilities {
         $post_data = '{ "contacts": ["'.$uuid.'"], "text": "'.$msg.'" }';
         error_log($post_data);
         array_push($broadcast_data,json_decode($post_data));
-        $this->exec_request("Sending Broadcast Message To Rapidpro Contacts",$url,"","","POST",$post_data,$header);
+        $this->exec_request($subject,$url,"","","POST",$post_data,$header);
       }
       //push data for reporting to openHIM
       array_push($this->response_body,array($subject=>$broadcast_data));
