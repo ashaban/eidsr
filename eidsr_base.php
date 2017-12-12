@@ -202,7 +202,7 @@ class eidsr_base extends openHimUtilities {
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
             <csd:organization entityID="'.$district_uuid.'"/>
           </csd:requestParams>';
-    $prov_entity = exec_request("Getting DSO",$url,"","","POST",$csr);
+    $prov_entity = $this->exec_request("Getting DSO",$url,"","","POST",$csr);
     $prov_entity = new SimpleXMLElement($prov_entity);
     foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
       global $dso;
@@ -229,7 +229,7 @@ class eidsr_base extends openHimUtilities {
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
             <csd:organization entityID="'.$county_uuid.'"/>
           </csd:requestParams>';
-    $prov_entity = exec_request("Getting CSO",$url,"","","POST",$csr);
+    $prov_entity = $this->exec_request("Getting CSO",$url,"","","POST",$csr);
     $prov_entity = new SimpleXMLElement($prov_entity);
     foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
       global $cso;
@@ -255,7 +255,7 @@ class eidsr_base extends openHimUtilities {
     $csr='<csd:requestParams xmlns:csd="urn:ihe:iti:csd:2013">
             <csd:organization entityID="'.$county_uuid.'"/>
           </csd:requestParams>';
-    $prov_entity = exec_request("Getting CDO",$url,"","","POST",$csr);
+    $prov_entity = $this->exec_request("Getting CDO",$url,"","","POST",$csr);
     $prov_entity = new SimpleXMLElement($prov_entity);
     foreach ($prov_entity->providerDirectory->children("urn:ihe:iti:csd:2013") as $prov) {
       global $cdo;
@@ -379,7 +379,7 @@ class eidsr_base extends openHimUtilities {
   }
 
   public function find_case_by_id($trackerid) {
-    $cases = (new MongoDB\Client)->{$this->database}->case_details
+    $cases = (new MongoDB\Client)->{$this->database}->case_details;
     $case = $cases->findOne(array("trackerid"=>$trackerid));
     return $case;
   }

@@ -177,6 +177,7 @@ $category = $_REQUEST["category"];
 $samples = $_REQUEST["samples"];
 $reporter_rp_id = $_REQUEST["reporter_rp_id"];
 //require("test_config.php");
+$samples = preg_replace('/\s+/', '', $samples);
 $riderObj = new riders($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,
                   $csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,$eidsr_passwd,$samples,
                   $reporter_rp_id,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword

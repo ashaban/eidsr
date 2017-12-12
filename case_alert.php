@@ -359,6 +359,7 @@ $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
 //require("test_config.php");
 //in case this is comming from test workflow
+$report = preg_replace('/\s+/', '', $report);
 $report = str_ireplace("testalert.","",$report);
 $report = str_ireplace("alert.","",$report);
 $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,

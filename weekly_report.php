@@ -113,6 +113,7 @@ $reporter_rp_id = $_REQUEST["reporter_rp_id"];
 $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
 $report_first_day_name = date('l', strtotime("Sunday +{$weekly_report_first_day} days"));
+$report = preg_replace('/\s+/', '', $report);
 $cases = str_ireplace("testwr.","",$report);
 $cases = str_ireplace("wr.","",$cases);
 
