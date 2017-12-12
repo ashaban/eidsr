@@ -94,6 +94,7 @@ class weekly_reminders extends eidsr_base{
               $reminded[] = $wr["reporter_rapidpro_id"];
             }
             //in case no HWs found on the DB who normally sends alers or weekly reports then ask DSO to remind the facility
+            /*
             if(count($reminded) == 0) {
               $dso = $this->get_dso($district);
               $fac_det = $this->get_facility_details ($facility_globalid,"uuid");
@@ -103,6 +104,7 @@ class weekly_reminders extends eidsr_base{
                 $this->broadcast("Ask DSO to remind facility",$contacts,$msg);
               }
             }
+            */
           }
         }
       }
