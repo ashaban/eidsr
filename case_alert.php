@@ -2,7 +2,7 @@
 require("eidsr_base.php");
 class eidsr extends eidsr_base{
   function __construct(
-                        $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,
+                        $reporter_phone,$reporter_name,$report,$full_report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,$rapidpro_url,
                         $case_alert_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,$eidsr_host,$eidsr_user,
                         $eidsr_passwd,$reported_disease,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database
                       ) {
@@ -16,6 +16,7 @@ class eidsr extends eidsr_base{
     $this->reporter_phone = $reporter_phone;
     $this->reporter_name = $reporter_name;
     $this->report = $report;
+    $this->full_report = $full_report;
     $this->reported_disease = $reported_disease;
     $this->reporter_rp_id = $reporter_rp_id;
     $this->reporter_globalid = $reporter_globalid;
@@ -162,6 +163,30 @@ class eidsr extends eidsr_base{
     return;
   }
 
+  public function save_failed_cases ($table,$reason,$trackerid=false,$idsrid=false) {
+    error_log($table);
+    $collection = (new MongoDB\Client)->{$this->database}->{$table};
+    $date = date("Y-m-d\TH:m:s");
+    $insertOneResult = $collection->insertOne([
+                                                "report"=>$this->full_report,
+                                                "disease_name"=>$this->reported_disease,
+                                                "reason"=>$reason,
+                                                "trackerid"=>$trackerid,
+                                                "reporter_globalid"=>$this->reporter_globalid,
+                                                "reporter_rapidpro_id"=>$this->reporter_rp_id,
+                                                "reporter_phone"=>$this->reporter_phone,
+                                                "reporter_name"=>$this->reporter_name,
+                                                "facility_globalid"=>$this->facility_details["facility_uuid"],
+                                                "facility_code"=>$this->facility_details["facility_code"],
+                                                "facility_name"=>$this->facility_details["facility_name"],
+                                                "district_name"=>$this->facility_details["district_name"],
+                                                "county_name"=>$this->facility_details["county_name"],
+                                                "openHimTransactionID"=>$this->openHimTransactionID,
+                                                "date"=>$date
+                                              ]);
+    error_log("case details saved to database with id ".$insertOneResult->getInsertedId());
+  }
+
   public function send_to_syncserver() {
     $header = Array(
                     "Content-Type: application/json"
@@ -179,6 +204,7 @@ class eidsr extends eidsr_base{
     list($header, $body) = explode("\r\n\r\n", $response, 2);
     error_log($response);
     if(count($header) == 0 or $header == "") {
+      $this->save_failed_cases("mediator_failed_cases","sync server returned empty header");
       error_log("Something went wrong,sync server returned empty header");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
 
@@ -189,6 +215,7 @@ class eidsr extends eidsr_base{
       array_push($this->response_body,array("Case Details"=>"Something went wrong,sync server returned empty header"));
     }
     if(count($body) == 0 or $body == "") {
+      $this->save_failed_cases("mediator_failed_cases","sync server returned empty body");
       error_log("Something went wrong,sync server returned empty body");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
 
@@ -202,6 +229,7 @@ class eidsr extends eidsr_base{
 
     $body = json_decode($body,true);
     if(array_key_exists("message",$body) and strpos($body["message"],"The caseI id is already") !== false) {
+      $this->save_failed_cases("mediator_failed_cases","Dupplicate CaseID");
       error_log("The caseID you submitted is already used,pleae resubmit this case with a different caseID");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"The caseID you submitted is already used,please resubmit this case with a different caseID");
 
@@ -214,6 +242,7 @@ class eidsr extends eidsr_base{
     }
     //above if statement will be replaced with this else statement after offline tracker codes that are in dev get deployed to production
     else if(array_key_exists("error",$body) and $body["error"] == "Duplicate caseid") {
+      $this->save_failed_cases("mediator_failed_cases","Dupplicate CaseID");
       error_log("The caseID you submitted is already used,pleae resubmit this case with a different caseID");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"The caseID you submitted is already used,please resubmit this case with a different caseID");
 
@@ -225,6 +254,7 @@ class eidsr extends eidsr_base{
       return false;
     }
     if(array_key_exists("message",$body) and strpos($body["message"],"Missing organisation unit (Facility) with code") !== false) {
+      $this->save_failed_cases("mediator_failed_cases",$body["message"]);
       error_log($body["message"]);
       array_push($this->response_body,array("Case Details"=>$body));
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"You are located in a facility that is not allowed to send case alerts");
@@ -237,6 +267,7 @@ class eidsr extends eidsr_base{
     }
     //above if statement will be replaced with this else statement after offline tracker codes that are in dev get deployed to production
     else if(array_key_exists("error",$body) and strpos($body["error"],"Missing organisation unit") !== false) {
+      $this->save_failed_cases("mediator_failed_cases",$body["message"]);
       error_log($body["error"]);
       array_push($this->response_body,array("Case Details"=>$body));
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"You are located in a facility that is not allowed to send case alerts");
@@ -248,6 +279,7 @@ class eidsr extends eidsr_base{
     }
 
     if(stripos($header,400) !== false) {
+      $this->save_failed_cases("mediator_failed_cases","Sync server is not responding");
       //report this to openHIM
       error_log($response);
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
@@ -262,6 +294,7 @@ class eidsr extends eidsr_base{
     }
     $idsrid = strtoupper($body["caseInfo"]["idsrId"]);
     if(!$idsrid) {
+      $this->save_failed_cases("mediator_failed_cases","Sync server didn't return idsrid");
       $this->broadcast("Alert Case Reporter",array($this->reporter_rp_id),"An error occured while processing your request,please retry after sometime");
       array_push($this->response_body,array("Case Details"=>"IDSRID was not returned by the sync server"));
 
@@ -290,6 +323,8 @@ class eidsr extends eidsr_base{
                                                 "trackerid"=>$trackerid,
                                                 "reporter_globalid"=>$this->reporter_globalid,
                                                 "reporter_rapidpro_id"=>$this->reporter_rp_id,
+                                                "reporter_phone"=>$this->reporter_phone,
+                                                "reporter_name"=>$this->reporter_name,
                                                 "facility_globalid"=>$this->facility_details["facility_uuid"],
                                                 "facility_code"=>$this->facility_details["facility_code"],
                                                 "facility_name"=>$this->facility_details["facility_name"],
@@ -304,14 +339,14 @@ class eidsr extends eidsr_base{
   }
 
   public function update_syncserver() {
-    if($this->community_detection)
-    $comm_det = '"communityLevelDetection":"'.$this->community_detection.'"';
-    if($this->international_travel)
-    $inter_trav = '"crossedBorder":"'.$this->international_travel.'"';
-    if($this->reason_no_specimen)
-    $reason_no_specimen = '"comments":"'.$this->reason_no_specimen.'"';
-    if($this->specimen_collected)
-    $specimen_collected = '"specimenCollected":"'.$this->specimen_collected.'"';
+    if ($this->community_detection)
+      $comm_det = '"communityLevelDetection":"' . $this->community_detection . '"';
+    if ($this->international_travel)
+      $inter_trav = '"crossedBorder":"' . $this->international_travel . '"';
+    if ($this->reason_no_specimen)
+      $reason_no_specimen = '"comments":"' . $this->reason_no_specimen . '"';
+    if ($this->specimen_collected)
+      $specimen_collected = '"specimenCollected":"' . $this->specimen_collected . '"';
 
     $post_data = '{'.$comm_det.$inter_trav.$reason_no_specimen.$specimen_collected.'}';
     error_log($post_data);
@@ -359,17 +394,25 @@ $reporter_name = $_REQUEST["reporter_name"];
 $reporter_globalid = $_REQUEST["reporter_globalid"];
 //require("test_config.php");
 //in case this is comming from test workflow
+$full_report = $report;
 $report = preg_replace('/\s+/', '', $report);
 $report = str_ireplace("testalert.","",$report);
 $report = str_ireplace("alert.","",$report);
-$eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
+$eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$full_report,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
                     $rapidpro_url,$case_alert_flow_uuid,$csd_host,$csd_user,$csd_passwd,$csd_doc,$rp_csd_doc,
                     $eidsr_host,$eidsr_user,$eidsr_passwd,$reported_disease,$openHimTransactionID,$ohimApiHost,$ohimApiUser,$ohimApiPassword,$database
                   );
+
+//cases which were detetected as wrong by rapidpro needs to be saved for displaying in the dashboard
+if($category == "rp_rejected") {
+  $eidsr->save_failed_cases("rapidpro_failed_cases","Disease code not found");
+  return;
+}
 $eidsr->issues_alert_group = $issues_alert_group;
 //if no facility for the reporter then
 if($eidsr->facility_details["facility_uuid"] == "") {
   $eidsr->broadcast("Alert Case Reporter",array($reporter_rp_id),"You are not allowed to access EIDSR system");
+  $eidsr->save_failed_cases("mediator_failed_cases","Facility details of case reporter are not in openinfoman");
 
   //alert eIDSR MOH Supervisors
   $msg = "openHIM Transaction ID is $eidsr->openHimTransactionID ,rapidpro ID $eidsr->reporter_rp_id.A contact Tried to send an alert but is not authorized to do so,go and review.";
@@ -399,6 +442,7 @@ if($category == "alert_all") {
   }
   else {
     $eidsr->broadcast("Alert Case Reporter",array($reporter_rp_id),"Case Id for this case report is missing,please resubmit the case with case ID");
+    $eidsr->save_failed_cases("mediator_failed_cases","Missing CaseID");
 
     //alert eIDSR MOH Supervisors
     $msg = "openHIM Transaction ID is $eidsr->openHimTransactionID ,rapidpro ID $eidsr->reporter_rp_id.A contact Submitted a case without caseID,go and review.";
