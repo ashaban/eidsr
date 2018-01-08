@@ -116,6 +116,12 @@ $report_first_day_name = date('l', strtotime("Sunday +{$weekly_report_first_day}
 $report = preg_replace('/\s+/', '', $report);
 $cases = str_ireplace("testwr.","",$report);
 $cases = str_ireplace("wr.","",$cases);
+$cases = str_ireplace("wr:","",$cases);
+$cases = str_ireplace("testwr:","",$report);
+$cases = str_ireplace("wr,","",$cases);
+$cases = str_ireplace("testwr,","",$cases);
+$cases = str_ireplace("wr","",$cases);
+$cases = str_ireplace("testwr","",$report);
 
 error_log("received weekly report with details ".print_r($_REQUEST,true));
 $weeklyReport = new weekly_report($reporter_phone,$reporter_name,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
@@ -132,6 +138,7 @@ if($weeklyReport->facility_details["facility_uuid"] == "") {
 }
 
 $casesArr = explode(".",$cases);
+
 if(count($casesArr) == 1) {
   $cases = $casesArr[0];
   $day_number = date("N");
