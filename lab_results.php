@@ -1,4 +1,5 @@
 <?php
+require("eidsr_base.php");
 class lab_results extends eidsr_base {
   function __construct(
                         $rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd_passwd,$csd_doc,
@@ -36,26 +37,32 @@ class lab_results extends eidsr_base {
 			$chunks = array_chunk($res_keys,$last_res_pos,true);
 			unset($chunks[0]);
     }
+    $sms = "IDSRID:" . $idsr_id;
+    $found = false;
     foreach ($chunks as $chunk_array) {
 		  foreach ($chunk_array as $tests) {
-		  	$sms .= "IDSRID:" . $idsr_id."\n";
-		    $sms .= "specimenType:" . $lab_res["labResults"][$tests]["specimenType"]."\n";
-		    $sms .= "Condition:" . $lab_res["labResults"][$tests]["condition"]."\n";
-		    $sms .= "Condition Reason:" . $lab_res["labResults"][$tests]["conditionReason"]."\n";
-		    $sms .= "Disease Or Condition:" . $lab_res["labResults"][$tests]["diseaseOrCondition"]."\n";
-		    $sms .= "finalLabResult:" . $lab_res["labResults"][$tests]["finalLabResult"]."\n";
-		    $sms .= "OtherConditionReason:" . $lab_res["labResults"][$tests]["otherConditionReason"]."\n";
-		    $sms .= "otherDisease:" . $lab_res["labResults"][$tests]["otherDisease"]."\n";
+        $sms .= $tests;
+		    $sms .= "specimenType:" . $lab_res["labResults"][$tests]["specimenType"];
+		    $sms .= "Condition:" . $lab_res["labResults"][$tests]["condition"];
+		    $sms .= "Condition Reason:" . $lab_res["labResults"][$tests]["conditionReason"];
+		    $sms .= "Disease Or Condition:" . $lab_res["labResults"][$tests]["diseaseOrCondition"];
+		    $sms .= "finalLabResult:" . $lab_res["labResults"][$tests]["finalLabResult"];
+		    $sms .= "OtherConditionReason:" . $lab_res["labResults"][$tests]["otherConditionReason"];
+		    $sms .= "otherDisease:" . $lab_res["labResults"][$tests]["otherDisease"];
+        $found = true;
 		  }
 		}
+    if(!$found)
+      $sms = "";
 		return $sms;
   }
 
   public function process_results($lab_res) {
     $trackerid = $lab_res["caseId"];
+    $case_details = $this->find_case_by_id($trackerid);
+    $this->facility_details = $this->get_provider_facility($case_details["reporter_globalid"]);
     if(count($case_details) > 0) {
-    	$case_details = find_case_by_id($trackerid);
-    	$results = get_lab_results($lab_res,$case_details["idsr_id"]);
+    	$results = $this->get_lab_results($lab_res,$case_details["idsr_id"]);
     	if($results == "") {
     		error_log("No Lab results was found on the request");
     		return;
