@@ -24,7 +24,7 @@ class weekly_report extends eidsr_base{
      $this->csd_doc = $csd_doc;
      $this->rp_csd_doc = $rp_csd_doc;
      $this->database = $database;
-     $this->eidsr_host = $eidsr_host;
+     $this->eidsr_host = $eidsr_host."/weeklyreport";
      $this->eidsr_user = $eidsr_user;
      $this->eidsr_passwd = $eidsr_passwd;
      $this->transaction_status = "Successful";
@@ -50,6 +50,23 @@ class weekly_report extends eidsr_base{
      $this->county_uuid = $this->facility_details["county_uuid"];
   }
 
+  public function send_to_syncserver($cases,$week_period) {
+    $week_period = date("Y-m-d",strtotime($week_period));
+    $header = Array(
+                    "Content-Type: application/json"
+                   );
+    $report = array(
+                      "facilityCode"=>$this->facility_details["facility_code"],
+                      "reportingEpiWeekPersonName"=>$this->reporter_name,
+                      "reportingEpiWeekPersonPhoneNumber"=>$this->reporter_phone,
+                      "reportedEpiWeekCases"=>$cases,
+                      "epiWeekStart"=>$week_period
+                    );
+    $jsonreport = json_encode($report);
+    $response = $this->exec_request("Submitting Weekly Report To Sync Server",$this->eidsr_host,$this->eidsr_user,$this->eidsr_passwd,"POST",$jsonreport,$header,true);
+    list($header, $body) = explode("\r\n\r\n", $response, 2);
+    error_log($response);
+  }
   public function alert_all ($cases,$week_period){
     $msg = $this->reporter_name ." Has submitted a weekly report of $cases aggregate cases from ".$this->facility_details["facility_name"]."(".$this->facility_details["district_name"].",".$this->facility_details["county_name"].") for the week period $week_period";
     $cont_alert = array();
@@ -117,11 +134,11 @@ $report = preg_replace('/\s+/', '', $report);
 $cases = str_ireplace("testwr.","",$report);
 $cases = str_ireplace("wr.","",$cases);
 $cases = str_ireplace("wr:","",$cases);
-$cases = str_ireplace("testwr:","",$report);
+$cases = str_ireplace("testwr:","",$cases);
 $cases = str_ireplace("wr,","",$cases);
 $cases = str_ireplace("testwr,","",$cases);
 $cases = str_ireplace("wr","",$cases);
-$cases = str_ireplace("testwr","",$report);
+$cases = str_ireplace("testwr","",$cases);
 
 error_log("received weekly report with details ".print_r($_REQUEST,true));
 $weeklyReport = new weekly_report($reporter_phone,$reporter_name,$reporter_rp_id,$reporter_globalid,$rapidpro_token,
@@ -158,7 +175,7 @@ if(count($casesArr) == 1) {
   if($report["_id"] != "" or $report["_id"] != null or $report["_id"] != false) {
     $formatted_week_period = date("l jS \of F Y",strtotime($week_period));
     $weeklyReport->broadcast("Alert Reporter of Weekly Report",array($reporter_rp_id),"The weekly report for week of $formatted_week_period already exists,your weekly report was not accepted");
-    $weeklyReport->updateTransaction($openHimTransactionID,"Failed",$weeklyReport->response_body,400,$weeklyReport->orchestrations);
+    $weeklyReport->updateTransaction($openHimTransactionID,"Completed",$weeklyReport->response_body,400,$weeklyReport->orchestrations);
     return false;
   }
 }
@@ -179,6 +196,8 @@ if(ctype_digit(strval($cases))) {
                                               "cases"=>$cases,
                                               "week_period"=>$week_period,
                                               "reporter_globalid"=>$weeklyReport->reporter_globalid,
+                                              "reporter_name"=>$weeklyReport->reporter_name,
+                                              "reporter_phone"=>$weeklyReport->reporter_phone,
                                               "reporter_rapidpro_id"=>$weeklyReport->reporter_rp_id,
                                               "facility_globalid"=>$weeklyReport->facility_details["facility_uuid"],
                                               "facility_code"=>$weeklyReport->facility_details["facility_code"],
@@ -193,6 +212,7 @@ if(ctype_digit(strval($cases))) {
   $weeklyReport->alert_all($cases,$formatted_week_period);
   $weeklyReport->updateTransaction($openHimTransactionID,$weeklyReport->transaction_status,$weeklyReport->response_body,200,$weeklyReport->orchestrations);
   error_log("Weekly Report Saved To DB");
+  $weeklyReport->send_to_syncserver($cases,$week_period);
 }
 else {
   $weeklyReport->broadcast("Alert Reporter of Weekly Report",array($reporter_rp_id),"The weekly report you submitted does not include total cases,please resend in the format wr.total_cases e.g wr.4");

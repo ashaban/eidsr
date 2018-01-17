@@ -28,7 +28,7 @@ class eidsr extends eidsr_base{
     $this->csd_passwd = $csd_passwd;
     $this->csd_doc = $csd_doc;
     $this->rp_csd_doc = $rp_csd_doc;
-    $this->eidsr_host = $eidsr_host;
+    $this->eidsr_host = $eidsr_host."/casealert";
     $this->eidsr_user = $eidsr_user;
     $this->eidsr_passwd = $eidsr_passwd;
     $this->database = $database;
@@ -406,6 +406,7 @@ $eidsr = new eidsr( $reporter_phone,$reporter_name,$report,$full_report,$reporte
 //cases which were detetected as wrong by rapidpro needs to be saved for displaying in the dashboard
 if($category == "rp_rejected") {
   $eidsr->save_failed_cases("rapidpro_failed_cases","Disease code not found");
+  $eidsr->updateTransaction($openHimTransactionID,"Successful",$eidsr->response_body,200,$eidsr->orchestrations);
   return;
 }
 $eidsr->issues_alert_group = $issues_alert_group;
