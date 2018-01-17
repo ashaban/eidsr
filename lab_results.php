@@ -102,6 +102,9 @@ class lab_results extends eidsr_base {
         $this->broadcast("Send Lab Results To DPC+Others",$cont_alert,$results);
       }
     }
+    else {
+      error_log("Lab results was received but trackerid was not found on the database");
+    }
   }
 
 }
@@ -132,4 +135,5 @@ $labObj = new lab_results($rapidpro_token,$rapidpro_url,$csd_host,$csd_user,$csd
 $labObj->notify_group = $notify_group;
 $lab_res = @json_decode(($stream = fopen('php://input', 'r')) !== false ? stream_get_contents($stream) : "{}",true);
 $labObj->process_results($lab_res);
+$labObj->updateTransaction($labObj->openHimTransactionID,"Successful",$labObj->response_body,200,$labObj->orchestrations);
 ?>
