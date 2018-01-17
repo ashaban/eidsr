@@ -60,8 +60,8 @@ class lab_results extends eidsr_base {
   public function process_results($lab_res) {
     $trackerid = $lab_res["caseId"];
     $case_details = $this->find_case_by_id($trackerid);
-    $this->facility_details = $this->get_provider_facility($case_details["reporter_globalid"]);
     if(count($case_details) > 0) {
+      $this->facility_details = $this->get_provider_facility($case_details["reporter_globalid"]);
     	$results = $this->get_lab_results($lab_res,$case_details["idsr_id"]);
     	if($results == "") {
     		error_log("No Lab results was found on the request");
