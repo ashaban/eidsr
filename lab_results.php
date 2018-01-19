@@ -37,13 +37,13 @@ class lab_results extends eidsr_base {
 			$chunks = array_chunk($res_keys,$last_res_pos,true);
 			unset($chunks[0]);
     }
-    $sms = "IDSRID:" . $idsr_id;
+    $sms = "IDSRID:" . $idsr_id."\\n";
     $found = false;
     foreach ($chunks as $chunk_array) {
 		  foreach ($chunk_array as $tests) {
-        $sms .= $tests;
-		    $sms .= "specimenType:" . $lab_res["labResults"][$tests]["specimenType"];
-		    $sms .= "Condition:" . $lab_res["labResults"][$tests]["condition"];
+        $sms .= $tests."\\n";
+		    $sms .= "specimenType:" . $lab_res["labResults"][$tests]["specimenType"]."\\n";
+		    $sms .= "Condition:" . $lab_res["labResults"][$tests]["condition"]."\\n";
 		    $sms .= "Condition Reason:" . $lab_res["labResults"][$tests]["conditionReason"];
 		    $sms .= "Disease Or Condition:" . $lab_res["labResults"][$tests]["diseaseOrCondition"];
 		    $sms .= "finalLabResult:" . $lab_res["labResults"][$tests]["finalLabResult"];
